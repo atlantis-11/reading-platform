@@ -1,6 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const userRoutes = require('./routes/userRoutes')
+const authRoutes = require('./routes/authRoutes')
 require('./config/database');
 require('./config/passport');
 
@@ -10,7 +10,7 @@ const port = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/users/', userRoutes);
+app.use('/api/auth/', authRoutes);
 
 app.listen(port, () => {
     console.log(`Server is up and running on port ${port}`);
