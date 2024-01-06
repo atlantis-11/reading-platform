@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const AppError = require('../utils/AppError');
 
 async function findUserByCredentials (usernameOrEmail, password) {
     let user = {};
@@ -13,13 +14,13 @@ async function findUserByCredentials (usernameOrEmail, password) {
     }
 
     if (!user) {
-        throw new Error('Invalid credentials');
+        throw new AppError('Invalid credentials', 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-        throw new Error('Invalid credentials');
+        throw new AppError('Invalid credentials', 401);
     }
 
     return user;
@@ -47,7 +48,7 @@ function decodeRefreshToken (refreshToken) {
     try {
         return jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (e) {
-        throw new Error('Error decoding refresh token');
+        throw new AppError('Error decoding refresh token', 401);
     }
 }
 
@@ -55,7 +56,7 @@ async function findUserByRefreshToken (refreshToken) {
     const userId = decodeRefreshToken(refreshToken).sub;
     const user = await User.findById(userId);
     if (!user) {
-        throw new Error('No user corresponding to refresh token');
+        throw new AppError('No user corresponding to refresh token', 401);
     }
     return user;
 }
@@ -68,7 +69,7 @@ async function handleRefreshTokenReuse (user, refreshToken) {
     if (!user.refreshTokens.includes(refreshToken)) {
         user.refreshTokens = [];
         await user.save();
-        throw new Error('Refresh token reuse detected, all refresh tokens revoked');
+        throw new AppError('Refresh token reuse detected, all refresh tokens revoked', 401);
     }
 }
 

@@ -2,9 +2,10 @@
   "name": "reading-platform-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "dev": "nodemon --env-file=.env.development",
+    "start": "nodemon --env-file=.env.production index.js",
+    "dev": "nodemon --env-file=.env.development index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,6 +14,7 @@
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",

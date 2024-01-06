@@ -1,81 +1,59 @@
 const User = require('../models/user');
+const AppError = require('../utils/AppError');
 const authService = require('../services/authService');
 const cookieService = require('../services/cookieService');
 const userLoginSchema = require('../joiSchemas/userLoginSchema');
 
-async function registerUser(req, res, next) {
-    try {
-        const user = new User(req.body);
-        await user.save();
-        // MongoServerError: E11000 duplicate key error collection
-        // ValidationError
+async function registerUser(req, res) {
+    const user = new User(req.body);
+    await user.save();
+    // MongoServerError: E11000 duplicate key error collection
+    // ValidationError
 
-        const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
+    const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
 
-        cookieService.setRefreshTokenCookie(res, refreshToken);
-        res.status(201).send({ user, accessToken });
-    } catch (e) {
-        next(e);
-    }
+    cookieService.setRefreshTokenCookie(res, refreshToken);
+    res.status(201).send({ user, accessToken });
 }
 
-async function loginUser(req, res, next) {
-    try {
-        const validationResult = userLoginSchema.validate(req.body);
-        if (validationResult.error) {
-            throw validationResult.error;
-        }
-
-        const user = await authService.findUserByCredentials(req.body.usernameOrEmail, req.body.password);
-
-        const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
-
-        cookieService.setRefreshTokenCookie(res, refreshToken);
-        res.send({ user, accessToken });
-    } catch (e) {
-        next(e);
+async function loginUser(req, res) {
+    const validationResult = userLoginSchema.validate(req.body);
+    if (validationResult.error) {
+        throw new AppError(validationResult.error.message, 401);
     }
+
+    const user = await authService.findUserByCredentials(req.body.usernameOrEmail, req.body.password);
+
+    const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
+
+    cookieService.setRefreshTokenCookie(res, refreshToken);
+    res.send({ user, accessToken });
 }
  
-async function logoutUser (req, res, next) {
-    try {
-        const refreshToken = cookieService.getRefreshTokenCookie(req);
-        //Error('No refresh token provided')
+async function logoutUser (req, res) {
+    const refreshToken = cookieService.getRefreshTokenCookie(req);
 
-        const user = await authService.findUserByRefreshToken(refreshToken);
-        // Error('Error decoding refresh token')
-        // Error('No user corresponding to refresh token')
+    const user = await authService.findUserByRefreshToken(refreshToken);
 
-        authService.removeRefreshToken(user, refreshToken);
-        await user.save();
+    authService.removeRefreshToken(user, refreshToken);
+    await user.save();
 
-        cookieService.clearRefreshTokenCookie(res);
-        res.sendStatus(204);
-    } catch (e) {
-        next(e);
-    }
+    cookieService.clearRefreshTokenCookie(res);
+    res.sendStatus(204);
 }
 
-async function refreshTokens(req, res, next) {
-    try {
-        const refreshToken = cookieService.getRefreshTokenCookie(req);
-        // Error('No refresh token provided')
+async function refreshTokens(req, res) {
+    const refreshToken = cookieService.getRefreshTokenCookie(req);
 
-        const user = await authService.findUserByRefreshToken(refreshToken);
-        // Error('Error decoding refresh token')
-        // Error('No user corresponding to refresh token')
+    const user = await authService.findUserByRefreshToken(refreshToken);
 
-        await authService.handleRefreshTokenReuse(user, refreshToken);
-        // Error('Refresh token reuse detected');
+    await authService.handleRefreshTokenReuse(user, refreshToken);
 
-        authService.removeRefreshToken(user, refreshToken);
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await authService.generateTokensAndSave(user);
+    authService.removeRefreshToken(user, refreshToken);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await authService.generateTokensAndSave(user);
 
-        cookieService.setRefreshTokenCookie(res, newRefreshToken);
-        res.send({ newAccessToken });
-    } catch (e) {
-        next(e);
-    }
+    cookieService.setRefreshTokenCookie(res, newRefreshToken);
+    res.send({ newAccessToken });
 }
 
 module.exports = {

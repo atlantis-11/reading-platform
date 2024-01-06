@@ -1,7 +1,9 @@
+const AppError = require('../utils/AppError');
+
 function getRefreshTokenCookie(req) {
     const refreshToken = req.cookies['refreshToken'];
     if (!refreshToken) {
-        throw new Error('No refresh token provided');
+        throw new AppError('No refresh token provided', 401);
     }
     return refreshToken;
 }
