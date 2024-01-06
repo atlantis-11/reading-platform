@@ -1,8 +1,9 @@
+const Joi = require('joi');
 const User = require('../models/user');
 const AppError = require('../utils/AppError');
 const authService = require('../services/authService');
 const cookieService = require('../services/cookieService');
-const userLoginSchema = require('../joiSchemas/userLoginSchema');
+const userLoginSchema = require('../utils/joiSchemas/userLoginSchema');
 
 async function registerUser(req, res) {
     const user = new User(req.body);
@@ -17,10 +18,8 @@ async function registerUser(req, res) {
 }
 
 async function loginUser(req, res) {
-    const validationResult = userLoginSchema.validate(req.body);
-    if (validationResult.error) {
-        throw new AppError(validationResult.error.message, 401);
-    }
+    Joi.assert(req.body, userLoginSchema);
+    // ValidationError
 
     const user = await authService.findUserByCredentials(req.body.usernameOrEmail, req.body.password);
 
