@@ -24,7 +24,7 @@ async function findUserByCredentials (usernameOrEmail, password) {
     }
 
     return user;
-};
+}
 
 function generateAccessToken (user) {
     return jwt.sign({ sub: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
@@ -32,7 +32,7 @@ function generateAccessToken (user) {
 
 function generateRefreshToken (user) {
     return jwt.sign({ sub: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' });
-};
+}
 
 async function generateTokensAndSave (user) {
     const accessToken = generateAccessToken(user);

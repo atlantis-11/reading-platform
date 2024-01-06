@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const User = require('../models/user');
-const AppError = require('../utils/AppError');
 const authService = require('../services/authService');
 const cookieService = require('../services/cookieService');
 const userLoginSchema = require('../utils/joiSchemas/userLoginSchema');
