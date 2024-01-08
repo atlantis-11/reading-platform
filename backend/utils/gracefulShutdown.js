@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+const logger = require('./logger');
 
 function gracefulShutdown (signal, server) {
-    console.log(`${signal} reveiced, gracefully shutting down...`);
+    logger.info(`${signal} reveiced, gracefully shutting down...`);
 
     server.close(() => {
-        console.log('Express server closed.');
+        logger.info('Express server closed.');
 
         mongoose.connection.close(false).then(() => {
-            console.log('Mongoose connection closed.');
+            logger.info('Mongoose connection closed.');
             process.exit(0);
         });
     });

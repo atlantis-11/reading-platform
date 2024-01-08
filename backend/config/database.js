@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => { console.log('Connected to MongoDB'); })
+    .then(() => { logger.info('Connected to MongoDB'); })
     .catch((error) => {
-        console.error(`Error connecting to MongoDB: ${error.message}`);
+        logger.error(`Error connecting to MongoDB: ${error.message}`);
         process.exit(1);
     });

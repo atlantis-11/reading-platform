@@ -1,10 +1,9 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
+const { StatusCodes } = require('http-status-codes');
 const AppError = require('../utils/AppError');
+const logger = require('../utils/logger');
 
 function sendDevError (error, res) {
     res.status(error.statusCode).json({
-        status: error.status,
         message: error.message,
         stack: error.stack,
         error: error
@@ -12,46 +11,27 @@ function sendDevError (error, res) {
 }
 
 function sendProdError (error, res) {
-    if (error.isOperational) {
+    if (error instanceof AppError) {
         res.status(error.statusCode).json({
-            status: error.status,
             message: error.message
         });
     } else {
-        res.status(500).json({
-            status: 'error',
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: 'Something went wrong'
         });
     }
 }
 
-function duplicateKeyError (error) {
-    return new AppError(`${Object.keys(error.keyValue)[0]} is not unique`, 400);
-}
-
-function mongooseValidationError (error) {
-    return new AppError(error.message, 400);
-}
-
-function joiValidationError (error) {
-    return new AppError(error.details.map(item => item.message).join(', '), 400);
-}
-
 function errorHandler (error, req, res, next) {
-    error.statusCode = error.statusCode || 500;
-    error.status = error.status || 'error';
+    error.statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 
-    const nodeEnv = process.env.NODE_ENV || 'production';
-
-    if (nodeEnv === 'development') {
+    if (process.env.NODE_ENV === 'development') {
         sendDevError(error, res);
-    } else if (nodeEnv === 'production')  {
-        if (error.name === 'MongoServerError' && error.code === 11000) error = duplicateKeyError(error);
-        if (error instanceof mongoose.Error.ValidationError) error = mongooseValidationError(error);
-        if (Joi.isError(error)) error = joiValidationError(error);
-
+    } else if (process.env.NODE_ENV === 'production')  {
         sendProdError(error, res);
     }
+
+    logger.error(error);
 }
 
 module.exports = errorHandler;
