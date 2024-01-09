@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const { ROLES } = require('../config/constants');
 
 const schema = new mongoose.Schema({
     username: {
@@ -31,7 +32,13 @@ const schema = new mongoose.Schema({
         trim: true,
         minlength: [8, 'Password must be at least 8 characters long']
     },
-    refreshTokens: [String]
+    refreshTokens: [String],
+    role: {
+        type: String,
+        required: true,
+        enum: Object.values(ROLES),
+        default: ROLES.USER
+    }
 }, {
     timestamps: true
 });
@@ -43,6 +50,16 @@ schema.pre('save', async function (next) {
     }
     next();
 });
+
+schema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.refreshTokens;
+
+    return userObject;
+};
 
 const User = mongoose.model('User', schema);
 

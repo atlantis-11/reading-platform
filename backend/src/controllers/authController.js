@@ -52,7 +52,7 @@ async function refreshTokens(req, res) {
     logger.info(`User with id='${user._id}' refreshed tokens`);
 
     cookieService.setRefreshTokenCookie(res, newRefreshToken);
-    res.send({ newAccessToken });
+    res.send({ accessToken: newAccessToken });
 }
 
 module.exports = {
