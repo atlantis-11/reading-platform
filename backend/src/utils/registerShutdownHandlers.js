@@ -13,6 +13,10 @@ function gracefulShutdown(exitCode, reason, server) {
                 process.exit(exitCode);
             });
         });
+
+        setTimeout(() => {
+            process.exit(exitCode);
+        }, 3000);
     };
 }
 
