@@ -30,6 +30,11 @@
         ],
         "no-var": "error",
         "prefer-const": "error",
-        "eqeqeq": "error"
+        "eqeqeq": "error",
+        "space-before-function-paren": ["error", {
+            "anonymous": "always",
+            "named": "never",
+            "asyncArrow": "always"
+        }]
     }
 }

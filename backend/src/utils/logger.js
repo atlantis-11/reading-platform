@@ -1,6 +1,6 @@
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
-const { combine, timestamp, errors, colorize, json } = winston.format;
+const { combine, timestamp, errors, colorize, json, printf } = winston.format;
 
 let logger = {};
 
@@ -11,11 +11,15 @@ if (process.env.NODE_ENV === 'development') {
             colorize(),
             timestamp({ format: 'HH:mm:ss.SSS' }),
             errors({ stack: true }),
-            winston.format.printf(({ timestamp, level, message, stack }) => {
-                if (stack) {
-                    return `[${timestamp}] ${level}: ${message}\n${stack}`;
+            printf(({ timestamp, level, message, stack, ...metadata }) => {
+                let format = `${timestamp} [${level}]: ${message}`;
+                if (Object.keys(metadata).length > 0) {
+                    format += `, ${JSON.stringify(metadata)}`;
                 }
-                return `[${timestamp}] ${level}: ${message}`;
+                if (stack) {
+                    format += `\n${stack}`;
+                }
+                return format;
             })
         ),
         transports: [new winston.transports.Console()]

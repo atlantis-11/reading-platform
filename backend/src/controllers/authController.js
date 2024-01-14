@@ -1,42 +1,50 @@
-const { StatusCodes } = require('http-status-codes');
 const authService = require('../services/authService');
 const cookieService = require('../services/cookieService');
 const logger = require('../utils/logger');
 
 async function registerUser(req, res) {
-    const user = await authService.createNewUser(req.body);
-
-    logger.info(`User with id='${user._id}' registered`);
+    const user = await authService.createNewUser({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password
+    });
 
     const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
 
+    const message = 'User registered successfully';
+    logger.info(message, { userId: user._id });
+    
     cookieService.setRefreshTokenCookie(res, refreshToken);
-    res.status(StatusCodes.CREATED).send({ user, accessToken });
+    res.status(201).send({ message, user, accessToken });
 }
 
+
 async function loginUser(req, res) {
-    authService.validateLoginData(req.body);
+    // uses express-validator's result
+    authService.validateLoginData(req);
 
     const user = await authService.findUserByCredentials(req.body.usernameOrEmail, req.body.password);
 
     const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
 
-    logger.info(`User with id='${user._id}' logged in`);
+    const message = 'User logged in successfully';
+    logger.info(message, { userId: user._id });
 
     cookieService.setRefreshTokenCookie(res, refreshToken);
-    res.send({ user, accessToken });
+    res.send({ message, user, accessToken });
 }
  
-async function logoutUser (req, res) {
+async function logoutUser(req, res) {
     const refreshToken = cookieService.getRefreshTokenCookie(req);
 
     const user = await authService.findUserByRefreshToken(refreshToken);
     await authService.removeRefreshTokenAndSave(user, refreshToken);
 
-    logger.info(`User with id='${user._id}' logged out`);
+    const message = 'User logged out successfully';
+    logger.info(message, { userId: user._id });
 
     cookieService.clearRefreshTokenCookie(res);
-    res.sendStatus(StatusCodes.NO_CONTENT);
+    res.send({ message });
 }
 
 async function refreshTokens(req, res) {
@@ -49,10 +57,11 @@ async function refreshTokens(req, res) {
     await authService.removeRefreshTokenAndSave(user, refreshToken);
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await authService.generateTokensAndSave(user);
 
-    logger.info(`User with id='${user._id}' refreshed tokens`);
+    const message = 'User refreshed tokens successfully';
+    logger.info(message, { userId: user._id });
 
     cookieService.setRefreshTokenCookie(res, newRefreshToken);
-    res.send({ accessToken: newAccessToken });
+    res.send({ message, accessToken: newAccessToken });
 }
 
 module.exports = {

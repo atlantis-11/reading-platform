@@ -1,13 +1,16 @@
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcrypt');
-const { ROLES } = require('../config/constants');
+const { ROLES, USERNAME_COLLATION } = require('../config/constants');
 
 const schema = new mongoose.Schema({
     username: {
         type: String,
         required: [true, 'Username is required'],
-        unique: true,
+        index: {
+            unique: true,
+            collation: USERNAME_COLLATION
+        },
         trim: true,
         minlength: [4, 'Username must be at least 4 characters long'],
         validate: {
@@ -29,7 +32,6 @@ const schema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Password is required'],
-        trim: true,
         minlength: [8, 'Password must be at least 8 characters long']
     },
     refreshTokens: [String],

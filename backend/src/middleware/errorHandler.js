@@ -1,37 +1,23 @@
-const { StatusCodes } = require('http-status-codes');
-const AppError = require('../utils/AppError');
 const logger = require('../utils/logger');
+const { AppError, ValidationError, AuthenticationError } = require('../utils/customErrors');
 
-function sendDevError (error, res) {
-    res.status(error.statusCode).json({
-        message: error.message,
-        stack: error.stack,
-        error: error
-    });
-}
+function errorHandler(error, req, res, next) {
+    logger.error(error);
 
-function sendProdError (error, res) {
-    if (error instanceof AppError) {
+    if (error instanceof ValidationError || 
+        error instanceof AuthenticationError) {
+
+        res.status(error.statusCode).json({
+            message: error.message,
+            details: error.details
+        });
+    } else if (error instanceof AppError) {
         res.status(error.statusCode).json({
             message: error.message
         });
     } else {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            message: 'Something went wrong'
-        });
+        res.sendStatus(500);
     }
-}
-
-function errorHandler (error, req, res, next) {
-    error.statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
-
-    if (process.env.NODE_ENV === 'development') {
-        sendDevError(error, res);
-    } else if (process.env.NODE_ENV === 'production')  {
-        sendProdError(error, res);
-    }
-
-    logger.error(error);
 }
 
 module.exports = errorHandler;

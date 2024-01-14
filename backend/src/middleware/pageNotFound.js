@@ -1,4 +1,3 @@
-const { StatusCodes } = require('http-status-codes');
-const AppError = require('../utils/AppError');
+const { NotFoundError } = require('../utils/customErrors');
 
-module.exports = (res, req) => { throw new AppError('Page not found', StatusCodes.NOT_FOUND); };
+module.exports = (res, req) => { throw new NotFoundError('Page not found'); };

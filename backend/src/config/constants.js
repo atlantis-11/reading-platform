@@ -3,4 +3,9 @@ const ROLES = {
     ADMIN: 'ADMIN'
 };
 
-module.exports = { ROLES };
+const USERNAME_COLLATION = { locale: 'en', strength: 1 };
+
+module.exports = Object.freeze({
+    ROLES,
+    USERNAME_COLLATION
+});

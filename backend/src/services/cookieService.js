@@ -1,10 +1,9 @@
-const { StatusCodes } = require('http-status-codes');
-const AppError = require('../utils/AppError');
+const { AuthenticationError } = require('../utils/customErrors');
 
 function getRefreshTokenCookie(req) {
     const refreshToken = req.cookies['refreshToken'];
     if (!refreshToken) {
-        throw new AppError('No refresh token provided', StatusCodes.UNAUTHORIZED);
+        throw new AuthenticationError('No refresh token provided');
     }
     return refreshToken;
 }
