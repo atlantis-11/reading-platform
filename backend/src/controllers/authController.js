@@ -15,9 +15,10 @@ async function registerUser(req, res) {
     logger.info(message, { userId: user._id });
     
     cookieService.setRefreshTokenCookie(res, refreshToken);
-    res.status(201).send({ message, user, accessToken });
-}
 
+    const userDto = user.toObject({ select: ['username', 'email'] });
+    res.status(201).send({ message, user: userDto, accessToken });
+}
 
 async function loginUser(req, res) {
     // uses express-validator's result
@@ -31,9 +32,11 @@ async function loginUser(req, res) {
     logger.info(message, { userId: user._id });
 
     cookieService.setRefreshTokenCookie(res, refreshToken);
-    res.send({ message, user, accessToken });
+
+    const userDto = user.toObject({ select: ['username', 'email'] });
+    res.send({ message, user: userDto, accessToken });
 }
- 
+
 async function logoutUser(req, res) {
     const refreshToken = cookieService.getRefreshTokenCookie(req);
 

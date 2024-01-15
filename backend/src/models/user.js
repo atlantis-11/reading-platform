@@ -53,14 +53,25 @@ schema.pre('save', async function (next) {
     next();
 });
 
-schema.methods.toJSON = function () {
-    const user = this;
-    const userObject = user.toObject();
+schema.options.toObject = {
+    transform: (doc, ret, options) => {
+        let selectedFields = {};
 
-    delete userObject.password;
-    delete userObject.refreshTokens;
+        if (options.select && Array.isArray(options.select)) {
+            selectedFields = options.select;
+        } else if (options.hide && Array.isArray(options.hide)) {
+            selectedFields = Object.keys(ret).filter((field) => !options.hide.includes(field));
+        } else {
+            return ret;
+        }
 
-    return userObject;
+        const filteredObject = {};
+        selectedFields.forEach((field) => {
+            filteredObject[field] = ret[field];
+        });
+
+        return filteredObject;
+    }
 };
 
 const User = mongoose.model('User', schema);
