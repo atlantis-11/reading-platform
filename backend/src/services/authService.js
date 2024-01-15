@@ -29,7 +29,7 @@ async function createNewUser(data) {
             throw error;
         }
 
-        throw new ValidationError(message, details);
+        throw new ValidationError(message, { details });
     }
 }
 
@@ -39,7 +39,7 @@ function validateLoginData(req) {
         const details = errors.reduce((details, error) =>
             (details[error.path] = error.msg, details), {}
         );
-        throw new ValidationError('Invalid login data', details);
+        throw new ValidationError('Invalid login data', { details });
     }
 }
 
@@ -54,21 +54,21 @@ async function findUserByCredentials(usernameOrEmail, password) {
     }
 
     const message = 'Invalid login credentials';
-    const details = {};
+    const context = {};
     if (isEmail) {
-        details.email = usernameOrEmail;
+        context.email = usernameOrEmail;
     } else {
-        details.username = usernameOrEmail;
+        context.username = usernameOrEmail;
     }
 
     if (!user) {
-        throw new AuthenticationError(message, details);
+        throw new AuthenticationError(message, { context });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-        throw new AuthenticationError(message, details);
+        throw new AuthenticationError(message, { context });
     }
 
     return user;
@@ -98,7 +98,8 @@ function decodeRefreshToken(refreshToken) {
     } catch (error) {
         const message = 'Error decoding refresh token';
         if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
-            throw new AuthenticationError(message, { reason: error.message });
+            const details = { reason: error.message };
+            throw new AuthenticationError(message, { details });
         } else {
             throw new AuthenticationError(message);
         }
@@ -123,7 +124,8 @@ async function handleRefreshTokenReuse(user, refreshToken) {
     if (!user.refreshTokens.includes(refreshToken)) {
         user.refreshTokens = [];
         await user.save();
-        throw new AuthenticationError('Refresh token reuse detected, all user\'s refresh tokens revoked', { userId: user._id });
+        const context = { userId: user._id };
+        throw new AuthenticationError('Refresh token reuse detected, all user\'s refresh tokens revoked', { context });
     }
 }
 

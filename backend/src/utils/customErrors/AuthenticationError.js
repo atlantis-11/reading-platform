@@ -1,9 +1,8 @@
 const AppError = require('./AppError');
 
 class AuthenticationError extends AppError {
-    constructor(message, details = {}) {
-        super(message, 401);
-        this.details = details;
+    constructor(message, { details, context } = {}) {
+        super(message, { statusCode: 401, details, context });
     }
 }
 
