@@ -53,7 +53,7 @@ async function findUserByCredentials(usernameOrEmail, password) {
         user = await User.findOne({ username: usernameOrEmail }).collation(USERNAME_COLLATION);
     }
 
-    const message = `Invalid login credentials for ${isEmail ? 'email' : 'username'}: ${usernameOrEmail}`;
+    const message = 'Invalid login credentials';
     const details = {};
     if (isEmail) {
         details.email = usernameOrEmail;
@@ -123,7 +123,7 @@ async function handleRefreshTokenReuse(user, refreshToken) {
     if (!user.refreshTokens.includes(refreshToken)) {
         user.refreshTokens = [];
         await user.save();
-        throw new AuthenticationError(`Refresh token reuse detected for user with id='${user._id.toString()}', all refresh tokens revoked`, { userId: user._id });
+        throw new AuthenticationError('Refresh token reuse detected, all user\'s refresh tokens revoked', { userId: user._id });
     }
 }
 

@@ -1,5 +1,8 @@
 const logger = require('../utils/logger');
+const filterObjectByKeys = require('../utils/filterObjectByKeys');
 const { AppError, ValidationError, AuthenticationError } = require('../utils/customErrors');
+
+const detailsToExclude = ['userId'];
 
 function errorHandler(error, req, res, next) {
     logger.error(error);
@@ -9,7 +12,7 @@ function errorHandler(error, req, res, next) {
 
         res.status(error.statusCode).json({
             message: error.message,
-            details: error.details
+            details: filterObjectByKeys(error.details, detailsToExclude)
         });
     } else if (error instanceof AppError) {
         res.status(error.statusCode).json({
