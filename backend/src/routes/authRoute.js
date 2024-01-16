@@ -1,12 +1,13 @@
 const asyncHandler = require('express-async-handler');
 const express = require('express');
+const { loginValidator } = require('../middleware/validators');
+const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHandleResult');
 const {
     registerUser,
     loginUser,
     refreshTokens,
     logoutUser
 } = require('../controllers/authController');
-const { loginValidator } = require('../middleware/validators');
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post(
 
 router.post(
     '/login',
-    loginValidator(),
+    runValidatorsAndHandleResult(loginValidator, 'Invalid login data'),
     asyncHandler(loginUser)
 );
 

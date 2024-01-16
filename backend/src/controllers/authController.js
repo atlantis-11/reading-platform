@@ -34,9 +34,6 @@ async function registerUser(req, res) {
 }
 
 async function loginUser(req, res) {
-    // uses express-validator's result
-    validateLoginData(req);
-
     const user = await findUserByCredentials(req.body.usernameOrEmail, req.body.password);
 
     const { accessToken, refreshToken } = await generateTokensAndSave(user);

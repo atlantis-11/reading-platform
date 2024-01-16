@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const _ = require('lodash');
-const { validationResult } = require('express-validator');
 const User = require('../models/userModel');
 const { USERNAME_COLLATION } = require('../config/constants');
 const { ValidationError, AuthenticationError } = require('../utils/customErrors');
@@ -30,16 +29,6 @@ async function createNewUser(data) {
         }
 
         throw new ValidationError(message, { details });
-    }
-}
-
-function validateLoginData(req) {
-    const errors = validationResult(req).array();
-    if (errors.length !== 0) {
-        const details = errors.reduce((details, error) =>
-            (details[error.path] = error.msg, details), {}
-        );
-        throw new ValidationError('Invalid login data', { details });
     }
 }
 
@@ -131,7 +120,6 @@ async function handleRefreshTokenReuse(user, refreshToken) {
 
 module.exports = {
     createNewUser,
-    validateLoginData,
     findUserByCredentials,
     generateAccessToken,
     generateRefreshToken,
