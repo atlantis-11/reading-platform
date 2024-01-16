@@ -1,21 +1,33 @@
 const _ = require('lodash');
-const authService = require('../services/authService');
-const cookieService = require('../services/cookieService');
 const logger = require('../utils/logger');
+const {
+    createNewUser,
+    validateLoginData,
+    findUserByCredentials,
+    generateTokensAndSave,
+    findUserByRefreshToken,
+    removeRefreshTokenAndSave,
+    handleRefreshTokenReuse
+} = require('../services/authService');
+const {
+    getRefreshTokenCookie,
+    setRefreshTokenCookie,
+    clearRefreshTokenCookie
+} = require('../services/cookieService');
 
 async function registerUser(req, res) {
-    const user = await authService.createNewUser({
+    const user = await createNewUser({
         username: req.body.username,
         email: req.body.email,
         password: req.body.password
     });
 
-    const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
+    const { accessToken, refreshToken } = await generateTokensAndSave(user);
 
     const message = 'User registered successfully';
     logger.info(message, { userId: user._id });
     
-    cookieService.setRefreshTokenCookie(res, refreshToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     const userDto = _.pick(user, ['username', 'email']);
     res.status(201).send({ message, user: userDto, accessToken });
@@ -23,48 +35,48 @@ async function registerUser(req, res) {
 
 async function loginUser(req, res) {
     // uses express-validator's result
-    authService.validateLoginData(req);
+    validateLoginData(req);
 
-    const user = await authService.findUserByCredentials(req.body.usernameOrEmail, req.body.password);
+    const user = await findUserByCredentials(req.body.usernameOrEmail, req.body.password);
 
-    const { accessToken, refreshToken } = await authService.generateTokensAndSave(user);
+    const { accessToken, refreshToken } = await generateTokensAndSave(user);
 
     const message = 'User logged in successfully';
     logger.info(message, { userId: user._id });
 
-    cookieService.setRefreshTokenCookie(res, refreshToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     const userDto = _.pick(user, ['username', 'email']);
     res.send({ message, user: userDto, accessToken });
 }
 
 async function logoutUser(req, res) {
-    const refreshToken = cookieService.getRefreshTokenCookie(req);
+    const refreshToken = getRefreshTokenCookie(req);
 
-    const user = await authService.findUserByRefreshToken(refreshToken);
-    await authService.removeRefreshTokenAndSave(user, refreshToken);
+    const user = await findUserByRefreshToken(refreshToken);
+    await removeRefreshTokenAndSave(user, refreshToken);
 
     const message = 'User logged out successfully';
     logger.info(message, { userId: user._id });
 
-    cookieService.clearRefreshTokenCookie(res);
+    clearRefreshTokenCookie(res);
     res.send({ message });
 }
 
 async function refreshTokens(req, res) {
-    const refreshToken = cookieService.getRefreshTokenCookie(req);
+    const refreshToken = getRefreshTokenCookie(req);
 
-    const user = await authService.findUserByRefreshToken(refreshToken);
+    const user = await findUserByRefreshToken(refreshToken);
 
-    await authService.handleRefreshTokenReuse(user, refreshToken);
+    await handleRefreshTokenReuse(user, refreshToken);
 
-    await authService.removeRefreshTokenAndSave(user, refreshToken);
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await authService.generateTokensAndSave(user);
+    await removeRefreshTokenAndSave(user, refreshToken);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await generateTokensAndSave(user);
 
     const message = 'User refreshed tokens successfully';
     logger.info(message, { userId: user._id });
 
-    cookieService.setRefreshTokenCookie(res, newRefreshToken);
+    setRefreshTokenCookie(res, newRefreshToken);
     res.send({ message, accessToken: newAccessToken });
 }
 

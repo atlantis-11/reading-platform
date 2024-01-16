@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const _ = require('lodash');
 const { validationResult } = require('express-validator');
-const User = require('../models/user');
+const User = require('../models/userModel');
 const { USERNAME_COLLATION } = require('../config/constants');
 const { ValidationError, AuthenticationError } = require('../utils/customErrors');
 
