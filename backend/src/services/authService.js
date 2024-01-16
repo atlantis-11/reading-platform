@@ -2,8 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const validator = require('validator');
+const _ = require('lodash');
 const { validationResult } = require('express-validator');
-const capitalizeFirstLetter = require('../utils/capitalizeFirstLetter');
 const User = require('../models/user');
 const { USERNAME_COLLATION } = require('../config/constants');
 const { ValidationError, AuthenticationError } = require('../utils/customErrors');
@@ -20,7 +20,7 @@ async function createNewUser(data) {
 
         if (error.name === 'MongoServerError' && error.code === 11000) {
             const key = Object.keys(error.keyValue)[0];
-            details[key] = `${capitalizeFirstLetter(key)} is not unique`;
+            details[key] = `${_.upperFirst(key)} is not unique`;
         } else if (error instanceof mongoose.Error.ValidationError) {
             for (const key in error.errors) {
                 details[key] = error.errors[key].message;

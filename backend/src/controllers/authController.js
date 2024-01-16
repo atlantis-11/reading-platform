@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const authService = require('../services/authService');
 const cookieService = require('../services/cookieService');
 const logger = require('../utils/logger');
@@ -16,7 +17,7 @@ async function registerUser(req, res) {
     
     cookieService.setRefreshTokenCookie(res, refreshToken);
 
-    const userDto = user.toObject({ select: ['username', 'email'] });
+    const userDto = _.pick(user, ['username', 'email']);
     res.status(201).send({ message, user: userDto, accessToken });
 }
 
@@ -33,7 +34,7 @@ async function loginUser(req, res) {
 
     cookieService.setRefreshTokenCookie(res, refreshToken);
 
-    const userDto = user.toObject({ select: ['username', 'email'] });
+    const userDto = _.pick(user, ['username', 'email']);
     res.send({ message, user: userDto, accessToken });
 }
 

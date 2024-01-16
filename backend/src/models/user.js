@@ -53,27 +53,6 @@ schema.pre('save', async function (next) {
     next();
 });
 
-schema.options.toObject = {
-    transform: (doc, ret, options) => {
-        let selectedFields = {};
-
-        if (options.select && Array.isArray(options.select)) {
-            selectedFields = options.select;
-        } else if (options.hide && Array.isArray(options.hide)) {
-            selectedFields = Object.keys(ret).filter((field) => !options.hide.includes(field));
-        } else {
-            return ret;
-        }
-
-        const filteredObject = {};
-        selectedFields.forEach((field) => {
-            filteredObject[field] = ret[field];
-        });
-
-        return filteredObject;
-    }
-};
-
 const User = mongoose.model('User', schema);
 
 module.exports = User;
