@@ -12,7 +12,7 @@ function handleValidationResult(errorMessage) {
         } else {
             next();
         }
-    }
+    };
 }
 
 module.exports = (validators, errorMessage) => {

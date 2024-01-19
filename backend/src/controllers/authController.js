@@ -2,7 +2,6 @@ const _ = require('lodash');
 const logger = require('../utils/logger');
 const {
     createNewUser,
-    validateLoginData,
     findUserByCredentials,
     generateTokensAndSave,
     findUserByRefreshToken,

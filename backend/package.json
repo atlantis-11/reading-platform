@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --env-file=.env.production ./src/index.js",
     "dev": "nodemon --env-file=.env.development ./src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "lint": "eslint ./"
   },
   "author": "",
@@ -29,6 +29,10 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "nodemon": "^3.0.2"
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.1.6",
+    "nodemon": "^3.0.2",
+    "set-cookie-parser": "^2.6.0",
+    "supertest": "^6.3.4"
   }
 }

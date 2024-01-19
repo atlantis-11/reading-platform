@@ -41,6 +41,10 @@ if (process.env.NODE_ENV === 'development') {
             })
         ]
     });
+} else if (process.env.NODE_ENV === 'test')  {
+    logger = winston.createLogger({
+        silent: true
+    });
 }
 
 module.exports = logger;
