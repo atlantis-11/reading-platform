@@ -1,6 +1,6 @@
 const config = {
-    globalSetup: './tests/globalSetup',
-    globalTeardown: './tests/globalTeardown'
+    globalSetup: './tests/utils/globalSetup',
+    globalTeardown: './tests/utils/globalTeardown'
 };
 
 module.exports = config;

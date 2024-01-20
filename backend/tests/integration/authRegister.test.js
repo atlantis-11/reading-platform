@@ -4,10 +4,9 @@ const _ = require('lodash');
 const { parse: parseCookies } = require('set-cookie-parser');
 const app = require('../../src/app');
 const User = require('../../src/models/userModel');
-const {
-    connectToDb,
-    dropDbAndDisconnect
-} = require('../testUtils');
+const { connectToDb, dropDbAndDisconnect } = require('../utils/dbHelpers');
+
+const RegistrationUserDataFactory = require('../utils/registrationUserDataFactory');
 
 async function registerUser(userData) {
     const response = await request(app)
@@ -26,25 +25,12 @@ async function registerUserAndExpectError(userData, expectedDetails) {
     });
 }
 
-const validUserData = {
-    username: 'testuser',
-    email: 'testuser@example.com',
-    password: 'testpassword'
-};
-
-const invalidRegisterTestsName = 'should return 400 status and correct error details: $details';
-
 describe('/api/auth/register', () => {
-    beforeEach(async () => {
-        await connectToDb();
-    });
-    
-    afterEach(async () => {
-        await dropDbAndDisconnect();
-    });
+    beforeEach(async () => await connectToDb());
+    afterEach(async () => await dropDbAndDisconnect());
     
     describe('POST - Valid Data', () => {
-        const userData = { ...validUserData };
+        const userData = new RegistrationUserDataFactory().build();
         let response;
 
         beforeEach(async () => {
@@ -56,19 +42,16 @@ describe('/api/auth/register', () => {
         });
 
         it('should have the correct response body', () => {
+            const { username, email } = userData;
             expect(response.body).toMatchObject({
                 message: 'User registered successfully',
-                user: {
-                    username: userData.username,
-                    email: userData.email
-                },
+                user: { username, email },
                 accessToken: expect.any(String)
             });
         });
 
         it('should set the refreshToken cookie', () => {
             const refreshTokenCookie = _.find(parseCookies(response), { name: 'refreshToken' });
-    
             expect(refreshTokenCookie).toBeTruthy();
             expect(refreshTokenCookie.httpOnly).toBe(true);
         });
@@ -78,12 +61,14 @@ describe('/api/auth/register', () => {
             expect(user.toObject()).toMatchObject({
                 username: userData.username,
                 email: userData.email,
-                password: bcrypt.hash(userData.password, 8),
                 role: 'USER',
-                refreshTokens: [_.find(parseCookies(response), { name: 'refreshToken' }).value]
+                refreshTokens: [ _.find(parseCookies(response), { name: 'refreshToken' }).value ]
             });
+            expect(bcrypt.compareSync(userData.password, user.password)).toBe(true);
         });
     });
+
+    const invalidRegisterTestsName = 'should return 400 status and error with details: $details';
 
     describe('POST - Invalid Username', () => {
         it.each([
@@ -91,7 +76,7 @@ describe('/api/auth/register', () => {
             { username: 'abc', details: 'Username must be at least 4 characters long' },
             { username: '$abcdef$', details: 'Username must only contain letters, numbers and underscores' }
         ])(invalidRegisterTestsName, async ({ username, details }) => {
-            const userData = { ...validUserData, username };
+            const userData = new RegistrationUserDataFactory({ username }).build();
             await registerUserAndExpectError(userData, { username: details });
         });
     });
@@ -101,7 +86,7 @@ describe('/api/auth/register', () => {
             { email: '', details: 'Email is required' },
             { email: 'abc', details: 'Invalid email address' }
         ])(invalidRegisterTestsName, async ({ email, details }) => {
-            const userData = { ...validUserData, email };
+            const userData = new RegistrationUserDataFactory({ email }).build();
             await registerUserAndExpectError(userData, { email: details });
         });
     });
@@ -111,8 +96,52 @@ describe('/api/auth/register', () => {
             { password: '', details: 'Password is required' },
             { password: 'abc', details: 'Password must be at least 8 characters long' }
         ])(invalidRegisterTestsName, async ({ password, details }) => {
-            const userData = { ...validUserData, password };
+            const userData = new RegistrationUserDataFactory({ password }).build();
             await registerUserAndExpectError(userData, { password: details });
+        });
+    });
+
+    const duplicationRegisterTestsName = 'should return 400 status and error with details: ';
+
+    describe('POST - Duplicate Username', () => {
+        const details = 'Username is not unique';
+        const testsName = duplicationRegisterTestsName + details;
+        let factoryObj;
+
+        beforeEach(async () => {
+            await registerUser(new RegistrationUserDataFactory().build());
+            factoryObj = new RegistrationUserDataFactory().addPrefixTo('email');
+        });
+
+        it(testsName, async () => {   
+            const userData = factoryObj.build();
+            await registerUserAndExpectError(userData, { username: details });
+        });
+
+        it(testsName + ' (test with different case)', async () => {
+            const userData = factoryObj.upperCase('username').build();  
+            await registerUserAndExpectError(userData, { username: details });
+        });
+    });
+
+    describe('POST - Duplicate Email', () => {
+        const details = 'Email is not unique';
+        const testsName = duplicationRegisterTestsName + details;
+        let factoryObj;
+
+        beforeEach(async () => {
+            await registerUser(new RegistrationUserDataFactory().build());
+            factoryObj = new RegistrationUserDataFactory().addPrefixTo('username');
+        });
+
+        it(testsName, async () => {   
+            const userData = factoryObj.build();
+            await registerUserAndExpectError(userData, { email: details });
+        });
+
+        it(testsName + ' (test with different case)', async () => {
+            const userData = factoryObj.upperCase('email').build();  
+            await registerUserAndExpectError(userData, { email: details });
         });
     });
 });
