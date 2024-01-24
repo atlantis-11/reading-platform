@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { ROLES, USERNAME_COLLATION } = require('../config/constants');
+const { ROLES } = require('../config/constants');
 
 const schema = new mongoose.Schema({
     username: {
@@ -9,7 +9,7 @@ const schema = new mongoose.Schema({
         required: [true, 'Username is required'],
         index: {
             unique: true,
-            collation: USERNAME_COLLATION
+            collation: { locale: 'en', strength: 1 }
         },
         trim: true,
         minlength: [4, 'Username must be at least 4 characters long'],
@@ -52,6 +52,14 @@ schema.pre('save', async function (next) {
     }
     next();
 });
+
+schema.query.byUsername = function (username) {
+    return this.where({ username: new RegExp(username, 'i') });
+};
+
+schema.query.byEmail = function (email) {
+    return this.where({ email: email.toLowerCase() });
+};
 
 const User = mongoose.model('User', schema);
 

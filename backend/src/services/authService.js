@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
 const User = require('../models/userModel');
-const { USERNAME_COLLATION } = require('../config/constants');
 const { AuthenticationError } = require('../utils/customErrors');
 
 async function createNewUser(data) {
@@ -23,9 +22,9 @@ async function findUserByCredentials(usernameOrEmail, password) {
     
     const isEmail = validator.isEmail(usernameOrEmail);
     if (isEmail) {
-        user = await User.findOne({ email: usernameOrEmail.toLowerCase() });
+        user = await User.findOne().byEmail(usernameOrEmail);
     } else {
-        user = await User.findOne({ username: usernameOrEmail }).collation(USERNAME_COLLATION);
+        user = await User.findOne().byUsername(usernameOrEmail);
     }
 
     const message = 'Invalid login credentials';
