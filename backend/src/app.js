@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const authRoute = require('./routes/authRoute');
+const userRoute = require('./routes/userRoute');
 const errorHandler = require('./middleware/errorHandler');
 const pageNotFound = require('./middleware/pageNotFound');
 
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth/', authRoute);
+app.use('/api/users/', userRoute);
 
 app.use(pageNotFound);
 

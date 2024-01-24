@@ -1,11 +1,10 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const validator = require('validator');
-const _ = require('lodash');
+const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
 const User = require('../models/userModel');
 const { USERNAME_COLLATION } = require('../config/constants');
-const { ValidationError, AuthenticationError } = require('../utils/customErrors');
+const { AuthenticationError } = require('../utils/customErrors');
 
 async function createNewUser(data) {
     const user = new User(data);
@@ -15,20 +14,7 @@ async function createNewUser(data) {
         return user;
     } catch (error) {
         const message = 'Error registering user';
-        const details = {};
-
-        if (error.name === 'MongoServerError' && error.code === 11000) {
-            const key = Object.keys(error.keyValue)[0];
-            details[key] = `${_.upperFirst(key)} is not unique`;
-        } else if (error instanceof mongoose.Error.ValidationError) {
-            for (const key in error.errors) {
-                details[key] = error.errors[key].message;
-            }
-        } else {
-            throw error;
-        }
-
-        throw new ValidationError(message, { details });
+        handleMongooseSaveErrors(error, message);
     }
 }
 
