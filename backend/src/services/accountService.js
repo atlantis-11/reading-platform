@@ -2,12 +2,14 @@ const _ = require('lodash');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
 const { ValidationError } = require('../utils/customErrors');
 
+const accountProps = ['username', 'email', 'isProfilePublic'];
+
 function getAccount(user) {
-    return _.pick(user, ['username', 'email']);
+    return _.pick(user, accountProps);
 }
 
 async function patchAccount(user, data) {
-    const allowedUpdates = ['username', 'email', 'password'];
+    const allowedUpdates = [...accountProps, 'password'];
     const notAllowedUpdates = Object.keys(data).filter((prop) => !allowedUpdates.includes(prop));
     if (notAllowedUpdates.length !== 0) {
         throw new ValidationError('Not all of the fields are allowed to be updated', { details: { fields: notAllowedUpdates } });

@@ -1,17 +1,20 @@
 const accountService = require('../services/accountService');
 
 function getAccount(req, res) {
-    const account = accountService.getAccount(req.user);
+    const user = req.requestedUser;
+    const account = accountService.getAccount(user);
     res.send({ account });
 }
 
 async function patchAccount(req, res) {
-    const account = await accountService.patchAccount(req.user, req.body);
+    const user = req.requestedUser;
+    const account = await accountService.patchAccount(user, req.body);
     res.send({ account });
 }
 
 async function deleteAccount(req, res) {
-    const account = await accountService.deleteAccount(req.user);
+    const user = req.requestedUser;
+    const account = await accountService.deleteAccount(user);
     res.send({ message: 'Account deleted successfully', account });
 }
 

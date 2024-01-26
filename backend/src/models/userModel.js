@@ -40,7 +40,16 @@ const schema = new mongoose.Schema({
         required: true,
         enum: Object.values(ROLES),
         default: ROLES.USER
-    }
+    },
+    isProfilePublic: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    books: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book'
+    }]
 }, {
     timestamps: true
 });

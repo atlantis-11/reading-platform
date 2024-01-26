@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const express = require('express');
-const auth = require('../middleware/auth');
-const usernameMatchesUser = require('../middleware/usernameMatchesUser');
+const authenticate = require('../middleware/authenticate');
+const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetRequestedUser');
 const {
     getAccount,
     patchAccount,
@@ -10,9 +10,10 @@ const {
 
 const router = express.Router();
 
-const accountRoute = '/:username/account';
-router.use(accountRoute, auth, usernameMatchesUser);
-router.route(accountRoute)
+router.use(authenticate);
+
+router.route('/:username/account')
+    .all(authorizeAndSetRequestedUser())
     .get(getAccount)
     .patch(asyncHandler(patchAccount))
     .delete(asyncHandler(deleteAccount));
