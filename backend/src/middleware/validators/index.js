@@ -1,5 +1,4 @@
-const loginValidator = require('./loginValidator');
-
 module.exports = {
-    loginValidator
+    loginValidator: require('./loginValidator'),
+    newBookValidator: require('./newBookValidator')
 };
