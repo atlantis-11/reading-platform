@@ -7,12 +7,12 @@ function getAccount(req, res) {
     res.send({ account });
 }
 
-async function patchAccount(req, res) {
+async function updateAccount(req, res) {
     const user = req.requestedUser;
-    const account = await accountService.patchAccount(user, req.body);
+    const account = await accountService.updateAccount(user, req.body);
 
     const message = 'Account updated successfully';
-    logger.info(message, { username: user.username });
+    logger.info(message, { userId: user._id });
     res.send({ message, account });
 }
 
@@ -21,12 +21,12 @@ async function deleteAccount(req, res) {
     const account = await accountService.deleteAccount(user);
 
     const message = 'Account deleted successfully';
-    logger.info(message, { username: user.username });
+    logger.info(message, { userId: user._id });
     res.send({ message, account });
 }
 
 module.exports = {
     getAccount,
-    patchAccount,
+    updateAccount,
     deleteAccount
 };

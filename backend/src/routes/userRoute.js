@@ -4,7 +4,7 @@ const authenticate = require('../middleware/authenticate');
 const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetRequestedUser');
 const {
     getAccount,
-    patchAccount,
+    updateAccount,
     deleteAccount
 } = require('../controllers/userController');
 
@@ -15,7 +15,7 @@ router.use(authenticate);
 router.route('/:username/account')
     .all(authorizeAndSetRequestedUser())
     .get(getAccount)
-    .patch(asyncHandler(patchAccount))
+    .patch(asyncHandler(updateAccount))
     .delete(asyncHandler(deleteAccount));
 
 module.exports = router;

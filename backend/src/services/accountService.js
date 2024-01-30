@@ -8,7 +8,7 @@ function getAccount(user) {
     return _.pick(user, accountProps);
 }
 
-async function patchAccount(user, data) {
+async function updateAccount(user, data) {
     const allowedUpdates = [...accountProps, 'password'];
     const notAllowedUpdates = Object.keys(data).filter((prop) => !allowedUpdates.includes(prop));
     if (notAllowedUpdates.length !== 0) {
@@ -32,6 +32,6 @@ async function deleteAccount(user) {
 
 module.exports = {
     getAccount,
-    patchAccount,
+    updateAccount,
     deleteAccount
 };

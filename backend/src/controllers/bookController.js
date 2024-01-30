@@ -7,11 +7,11 @@ async function addNewBook(req, res) {
 
     const bookInfo = await newBookService.getBookInfo(olid);
     const parsedBookInfo = await newBookService.parseBookInfo(bookInfo);
-    await newBookService.addBookToDb(parsedBookInfo);
+    const book = await newBookService.addBookToDb(parsedBookInfo);
 
     const message = 'New book added successfully';
-    logger.info(message, { olid });
-    res.send({ message, olid });
+    logger.info(message, { bookId: book._id });
+    res.send({ message, bookId: book._id });
 }
 
 module.exports = {

@@ -73,6 +73,7 @@ async function addBookToDb(bookInfo) {
     } catch (error) {
         handleMongooseSaveErrors(error, 'Error adding book to db');
     }
+    return book;
 }
 
 module.exports = {
