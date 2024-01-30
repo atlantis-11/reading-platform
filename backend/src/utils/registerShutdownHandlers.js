@@ -2,7 +2,11 @@ const logger = require('./logger');
 const mongoose = require('mongoose');
 
 function gracefulShutdown(exitCode, reason, server) {
-    return () => {
+    return (error) => {
+        if (exitCode !== 0) {
+            logger.error(error);
+        }
+        
         logger[exitCode === 0 ? 'info' : 'error'](`Gracefully shutting down, reason: ${reason}`);
 
         server.close(() => {
