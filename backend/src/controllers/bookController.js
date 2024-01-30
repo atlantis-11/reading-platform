@@ -9,7 +9,7 @@ async function addNewBook(req, res) {
     const parsedBookInfo = await newBookService.parseBookInfo(bookInfo);
     await newBookService.addBookToDb(parsedBookInfo);
 
-    const message = 'New book was successfully added';
+    const message = 'New book added successfully';
     logger.info(message, { olid });
     res.send({ message, olid });
 }

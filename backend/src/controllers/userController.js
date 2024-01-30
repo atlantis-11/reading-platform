@@ -1,4 +1,5 @@
 const accountService = require('../services/accountService');
+const logger = require('../utils/logger');
 
 function getAccount(req, res) {
     const user = req.requestedUser;
@@ -9,13 +10,19 @@ function getAccount(req, res) {
 async function patchAccount(req, res) {
     const user = req.requestedUser;
     const account = await accountService.patchAccount(user, req.body);
-    res.send({ account });
+
+    const message = 'Account updated successfully';
+    logger.info(message, { username: user.username });
+    res.send({ message, account });
 }
 
 async function deleteAccount(req, res) {
     const user = req.requestedUser;
     const account = await accountService.deleteAccount(user);
-    res.send({ message: 'Account deleted successfully', account });
+
+    const message = 'Account deleted successfully';
+    logger.info(message, { username: user.username });
+    res.send({ message, account });
 }
 
 module.exports = {
