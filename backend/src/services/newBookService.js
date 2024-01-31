@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Book = require('../models/bookModel');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
-const { NotFoundError, InternalServerError, ValidationError } = require('../utils/customErrors');
+const { NotFoundError, InternalServerError, DuplicateResourceError } = require('../utils/customErrors');
 
 const openLibraryUrl = 'https://openlibrary.org';
 
@@ -28,8 +28,9 @@ function makeKey(type, olid) {
 }
 
 async function checkIfAlreadyAdded(olid) {
-    if (await Book.exists({ olid })) {
-        throw new ValidationError('Book with this Open Library Id has already been added', { details: { olid } });
+    const book = await Book.findOne({ olid }).select('_id');
+    if (book) {
+        throw new DuplicateResourceError('Book with this Open Library Id has already been added', { details: { olid, bookId: book._id } });
     }
 }
 

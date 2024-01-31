@@ -15,10 +15,10 @@ async function registerUser(userData) {
     return response;
 }
 
-async function registerUserAndExpectError(userData, expectedDetails) {
+async function registerUserAndExpectError(userData, expectedDetails, errorCode = 400) {
     const response = await registerUser(userData);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(errorCode);
     expect(response.body).toMatchObject({
         message: 'Error registering user',
         details: expectedDetails
@@ -115,12 +115,12 @@ describe('/api/auth/register', () => {
 
         it(testsName, async () => {   
             const userData = factoryObj.build();
-            await registerUserAndExpectError(userData, { username: details });
+            await registerUserAndExpectError(userData, { username: details }, 409);
         });
 
         it(testsName + ' (test with different case)', async () => {
             const userData = factoryObj.upperCase('username').build();  
-            await registerUserAndExpectError(userData, { username: details });
+            await registerUserAndExpectError(userData, { username: details }, 409);
         });
     });
 
@@ -136,12 +136,12 @@ describe('/api/auth/register', () => {
 
         it(testsName, async () => {   
             const userData = factoryObj.build();
-            await registerUserAndExpectError(userData, { email: details });
+            await registerUserAndExpectError(userData, { email: details }, 409);
         });
 
         it(testsName + ' (test with different case)', async () => {
             const userData = factoryObj.upperCase('email').build();  
-            await registerUserAndExpectError(userData, { email: details });
+            await registerUserAndExpectError(userData, { email: details }, 409);
         });
     });
 });

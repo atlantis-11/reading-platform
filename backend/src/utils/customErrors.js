@@ -26,5 +26,6 @@ module.exports = {
     AuthenticationError: createErrorClass(401, 'AuthenticationError'),
     AuthorizationError: createErrorClass(403, 'AuthorizationError'),
     NotFoundError: createErrorClass(404, 'NotFoundError'),
+    DuplicateResourceError: createErrorClass(409, 'DuplicateResourceError'),
     InternalServerError: createErrorClass(500, 'InternalServerError')
 };
