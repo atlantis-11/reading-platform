@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { ROLES } = require('../config/constants');
+const { ROLES, BOOK_STATUSES } = require('../config/constants');
 
 const schema = new mongoose.Schema({
     username: {
@@ -47,6 +47,7 @@ const schema = new mongoose.Schema({
         default: true
     },
     books: [{
+        _id: false,
         bookId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Book',
@@ -54,7 +55,11 @@ const schema = new mongoose.Schema({
         },
         status: {
             type: String,
-            required: [true, 'Status is required']
+            required: [true, 'Status is required'],
+            enum: {
+                values: Object.values(BOOK_STATUSES),
+                message: `Invalid status value, valid values: ${Object.values(BOOK_STATUSES).join(', ')}`
+            }
         }
     }]
 }, {

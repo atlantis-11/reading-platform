@@ -1,5 +1,6 @@
 module.exports = {
     loginValidator: require('./loginValidator'),
     newBookValidator: require('./newBookValidator'),
-    addBookValidator: require('./addBookValidator')
+    addBookValidator: require('./addBookValidator'),
+    updateBookStatusValidator: require('./updateBookStatusValidator')
 };

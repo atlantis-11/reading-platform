@@ -3,6 +3,14 @@ const ROLES = {
     ADMIN: 'ADMIN'
 };
 
+const BOOK_STATUSES = {
+    TO_READ: 'to-read',
+    READING: 'reading',
+    READ: 'read',
+    DNF: 'dnf'
+};
+
 module.exports = Object.freeze({
-    ROLES
+    ROLES,
+    BOOK_STATUSES
 });

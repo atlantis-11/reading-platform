@@ -3,12 +3,13 @@ const express = require('express');
 const authenticate = require('../middleware/authenticate');
 const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetRequestedUser');
 const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHandleResult');
-const { addBookValidator } = require('../middleware/validators');
+const { addBookValidator, updateBookStatusValidator } = require('../middleware/validators');
 const {
     getAccount,
     updateAccount,
     deleteAccount,
-    addBook
+    addBook,
+    updateBookStatus
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -26,6 +27,13 @@ router.post(
     runValidatorsAndHandleResult(addBookValidator),
     authorizeAndSetRequestedUser(),
     asyncHandler(addBook)
+);
+
+router.patch(
+    '/:username/books/:bookId',
+    runValidatorsAndHandleResult(updateBookStatusValidator),
+    authorizeAndSetRequestedUser(),
+    asyncHandler(updateBookStatus)
 );
 
 module.exports = router;
