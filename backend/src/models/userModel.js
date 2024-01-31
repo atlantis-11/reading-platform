@@ -47,8 +47,15 @@ const schema = new mongoose.Schema({
         default: true
     },
     books: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Book'
+        bookId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Book',
+            required: [true, 'Book Id is required']
+        },
+        status: {
+            type: String,
+            required: [true, 'Status is required']
+        }
     }]
 }, {
     timestamps: true

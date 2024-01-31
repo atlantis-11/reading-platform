@@ -1,4 +1,5 @@
 const accountService = require('../services/accountService');
+const userBookService = require('../services/userBookService');
 const logger = require('../utils/logger');
 
 function getAccount(req, res) {
@@ -25,8 +26,22 @@ async function deleteAccount(req, res) {
     res.send({ message, account });
 }
 
+async function addBook(req, res) {
+    const user = req.requestedUser;
+    const { bookId, status } = req.body;
+
+    userBookService.checkIfBookAlreadyInTheList(user, bookId);
+    await userBookService.checkIfBookExists(bookId);
+    await userBookService.addBookToTheList(user, bookId, status);
+    
+    const message = 'Book added to user\'s list successfully';
+    logger.info(message, { userId: user._id, bookId, status });
+    res.send({ message });
+}
+
 module.exports = {
     getAccount,
     updateAccount,
-    deleteAccount
+    deleteAccount,
+    addBook
 };
