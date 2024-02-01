@@ -3,13 +3,18 @@ const express = require('express');
 const authenticate = require('../middleware/authenticate');
 const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetRequestedUser');
 const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHandleResult');
-const { addBookValidator, updateBookStatusValidator } = require('../middleware/validators');
+const {
+    addBookValidator,
+    updateBookStatusValidator,
+    getBookListValidator
+} = require('../middleware/validators');
 const {
     getAccount,
     updateAccount,
     deleteAccount,
     addBook,
-    updateBookStatus
+    updateBookStatus,
+    getBookList
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -34,6 +39,13 @@ router.patch(
     runValidatorsAndHandleResult(updateBookStatusValidator),
     authorizeAndSetRequestedUser(),
     asyncHandler(updateBookStatus)
+);
+
+router.get(
+    '/:username/books',
+    runValidatorsAndHandleResult(getBookListValidator),
+    authorizeAndSetRequestedUser({ publicEndpoint: true }),
+    asyncHandler(getBookList)
 );
 
 module.exports = router;

@@ -47,24 +47,24 @@ const schema = new mongoose.Schema({
         default: true
     },
     books: [{
-        _id: false,
-        bookId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Book',
-            required: [true, 'Book Id is required']
-        },
-        status: {
-            type: String,
-            required: [true, 'Status is required'],
-            enum: {
-                values: Object.values(BOOK_STATUSES),
-                message: `Invalid status value, valid values: ${Object.values(BOOK_STATUSES).join(', ')}`
+        type: new mongoose.Schema({
+            _id: false,
+            book: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Book',
+                required: [true, 'Book is required']
+            },
+            status: {
+                type: String,
+                required: [true, 'Status is required'],
+                enum: {
+                    values: Object.values(BOOK_STATUSES),
+                    message: `Invalid status value, valid values: ${Object.values(BOOK_STATUSES).join(', ')}`
+                }
             }
-        }
+        }, { timestamps: true })
     }]
-}, {
-    timestamps: true
-});
+}, { timestamps: true });
 
 schema.pre('save', async function (next) {
     const user = this;

@@ -52,10 +52,21 @@ async function updateBookStatus(req, res) {
     res.send({ message, bookId, status });
 }
 
+async function getBookList(req, res) {
+    const user = req.requestedUser;
+    const books = userBookService.filterAndSortBookList(user, req.query);
+
+    user.books = books;
+    await userBookService.populateBookList(user);
+
+    res.send(user.books);
+}
+
 module.exports = {
     getAccount,
     updateAccount,
     deleteAccount,
     addBook,
-    updateBookStatus
+    updateBookStatus,
+    getBookList
 };
