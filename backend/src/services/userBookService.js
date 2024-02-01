@@ -25,8 +25,8 @@ async function verifyBookExists(bookId) {
     }
 }
 
-async function addBookToTheList(user, bookId, status) {
-    user.readingList.push({ book: bookId, status });
+async function addBookToTheList(user, bookId) {
+    user.readingList.push({ book: bookId });
 
     try {
         await user.save();

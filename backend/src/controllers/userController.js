@@ -28,14 +28,14 @@ async function deleteAccount(req, res) {
 
 async function addBookToTheList(req, res) {
     const user = req.requestedUser;
-    const { bookId, status } = req.body;
+    const { bookId } = req.body;
 
     userBookService.verifyBookNotInTheList(user, bookId);
     await userBookService.verifyBookExists(bookId);
-    await userBookService.addBookToTheList(user, bookId, status);
+    await userBookService.addBookToTheList(user, bookId);
     
     const message = 'Book added to user\'s reading list successfully';
-    logger.info(message, { userId: user._id, bookId, status });
+    logger.info(message, { userId: user._id, bookId });
     res.send({ message });
 }
 

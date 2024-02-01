@@ -10,7 +10,16 @@ const BOOK_STATUSES = {
     DNF: 'dnf'
 };
 
+const JOURNAL_ENTRY_TYPES = {
+    TO_READ: 'to-read',
+    STARTED: 'started',
+    FINISHED: 'finished',
+    DNF: 'dnf',
+    PROGRESS: 'progress'
+};
+
 module.exports = Object.freeze({
     ROLES,
-    BOOK_STATUSES
+    BOOK_STATUSES,
+    JOURNAL_ENTRY_TYPES
 });
