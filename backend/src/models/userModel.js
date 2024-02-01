@@ -3,7 +3,24 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { ROLES, BOOK_STATUSES } = require('../config/constants');
 
-const schema = new mongoose.Schema({
+const readingListEntrySchema = new mongoose.Schema({
+    _id: false,
+    book: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book',
+        required: [true, 'Book is required']
+    },
+    status: {
+        type: String,
+        required: [true, 'Status is required'],
+        enum: {
+            values: Object.values(BOOK_STATUSES),
+            message: `Invalid status value, valid values: ${Object.values(BOOK_STATUSES).join(', ')}`
+        }
+    }
+}, { timestamps: true });
+
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: [true, 'Username is required'],
@@ -46,27 +63,10 @@ const schema = new mongoose.Schema({
         required: true,
         default: true
     },
-    books: [{
-        type: new mongoose.Schema({
-            _id: false,
-            book: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Book',
-                required: [true, 'Book is required']
-            },
-            status: {
-                type: String,
-                required: [true, 'Status is required'],
-                enum: {
-                    values: Object.values(BOOK_STATUSES),
-                    message: `Invalid status value, valid values: ${Object.values(BOOK_STATUSES).join(', ')}`
-                }
-            }
-        }, { timestamps: true })
-    }]
+    readingList: [readingListEntrySchema]
 }, { timestamps: true });
 
-schema.pre('save', async function (next) {
+userSchema.pre('save', async function (next) {
     const user = this;
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8);
@@ -74,14 +74,14 @@ schema.pre('save', async function (next) {
     next();
 });
 
-schema.query.byUsername = function (username) {
+userSchema.query.byUsername = function (username) {
     return this.where({ username: new RegExp(username, 'i') });
 };
 
-schema.query.byEmail = function (email) {
+userSchema.query.byEmail = function (email) {
     return this.where({ email: email.toLowerCase() });
 };
 
-const User = mongoose.model('User', schema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

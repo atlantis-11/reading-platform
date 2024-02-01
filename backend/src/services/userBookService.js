@@ -4,18 +4,18 @@ const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
 const { DuplicateResourceError, ValidationError } = require('../utils/customErrors');
 
 function isBookInTheList(user, bookId) {
-    return user.books.some(b => b.book.toString() === bookId);
+    return user.readingList.some(e => e.book.toString() === bookId);
 }
 
 function verifyBookNotInTheList(user, bookId) {
     if (isBookInTheList(user, bookId)) {
-        throw new DuplicateResourceError('Book is already in the list');
+        throw new DuplicateResourceError('Book is already in the reading list');
     }
 }
 
 function verifyBookInTheList(user, bookId) {
     if (!isBookInTheList(user, bookId)) {
-        throw new ValidationError('Book is not in the list');
+        throw new ValidationError('Book is not in the reading list');
     }
 }
 
@@ -26,18 +26,18 @@ async function verifyBookExists(bookId) {
 }
 
 async function addBookToTheList(user, bookId, status) {
-    user.books.push({ book: bookId, status });
+    user.readingList.push({ book: bookId, status });
 
     try {
         await user.save();
     } catch (error) {
-        handleMongooseSaveErrors(error, 'Error adding book to the list');
+        handleMongooseSaveErrors(error, 'Error adding book to the reading list');
     }
 }
 
 async function setBookStatus(user, bookId, status) {
-    const idx = user.books.findIndex(b => b.book.toString() === bookId);
-    user.books[idx].status = status;
+    const idx = user.readingList.findIndex(e => e.book.toString() === bookId);
+    user.readingList[idx].status = status;
 
     try {
         await user.save();
@@ -46,23 +46,23 @@ async function setBookStatus(user, bookId, status) {
     }
 }
 
-function filterAndSortBookList(user, { status, order, limit, skip, before, after } = {}) {
+function filterAndSortReadingList(user, { status, order, limit, skip, before, after } = {}) {
     const start = skip ? +skip : 0;
     const end = limit ? start + (+limit) : undefined;
 
-    return _.chain(user.books)
-        .filter(b => {
-            return (!status || b.status === status)
-                && (!before || b.updatedAt < new Date(before))
-                && (!after || b.updatedAt > new Date(after));
+    return _.chain(user.readingList)
+        .filter(e => {
+            return (!status || e.status === status)
+                && (!before || e.updatedAt < new Date(before))
+                && (!after || e.updatedAt > new Date(after));
         })
         .orderBy('updatedAt', order || 'desc')
         .slice(start, end)
         .value();
 }
 
-async function populateBookList(user) {
-    await user.populate('books.book', '-__v');
+async function populateReadingList(user) {
+    await user.populate('readingList.book', '-__v');
 }
 
 module.exports = {
@@ -71,6 +71,6 @@ module.exports = {
     verifyBookExists,
     addBookToTheList,
     setBookStatus,
-    filterAndSortBookList,
-    populateBookList
+    filterAndSortReadingList,
+    populateReadingList
 };

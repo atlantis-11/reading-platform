@@ -1,7 +1,7 @@
 module.exports = {
     loginValidator: require('./loginValidator'),
     newBookValidator: require('./newBookValidator'),
-    addBookValidator: require('./addBookValidator'),
+    addBookToTheListValidator: require('./addBookToTheListValidator'),
     updateBookStatusValidator: require('./updateBookStatusValidator'),
-    getBookListValidator: require('./getBookListValidator')
+    getReadingListValidator: require('./getReadingListValidator')
 };

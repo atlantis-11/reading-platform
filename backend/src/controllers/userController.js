@@ -26,7 +26,7 @@ async function deleteAccount(req, res) {
     res.send({ message, account });
 }
 
-async function addBook(req, res) {
+async function addBookToTheList(req, res) {
     const user = req.requestedUser;
     const { bookId, status } = req.body;
 
@@ -34,7 +34,7 @@ async function addBook(req, res) {
     await userBookService.verifyBookExists(bookId);
     await userBookService.addBookToTheList(user, bookId, status);
     
-    const message = 'Book added to user\'s list successfully';
+    const message = 'Book added to user\'s reading list successfully';
     logger.info(message, { userId: user._id, bookId, status });
     res.send({ message });
 }
@@ -52,21 +52,20 @@ async function updateBookStatus(req, res) {
     res.send({ message, bookId, status });
 }
 
-async function getBookList(req, res) {
+async function getReadingList(req, res) {
     const user = req.requestedUser;
-    const books = userBookService.filterAndSortBookList(user, req.query);
 
-    user.books = books;
-    await userBookService.populateBookList(user);
+    user.readingList = userBookService.filterAndSortReadingList(user, req.query);
+    await userBookService.populateReadingList(user);
 
-    res.send(user.books);
+    res.send(user.readingList);
 }
 
 module.exports = {
     getAccount,
     updateAccount,
     deleteAccount,
-    addBook,
+    addBookToTheList,
     updateBookStatus,
-    getBookList
+    getReadingList
 };
