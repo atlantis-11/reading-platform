@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const express = require('express');
 const authenticate = require('../middleware/authenticate');
-const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetRequestedUser');
+const authorize = require('../middleware/authorizeUserEndpoint');
 const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHandleResult');
 const {
     addBookToTheListValidator,
@@ -23,35 +23,35 @@ const router = express.Router();
 router.use(authenticate);
 
 router.route('/:username/account')
-    .all(authorizeAndSetRequestedUser())
-    .get(getAccount)
+    .all(authorize())
+    .get(asyncHandler(getAccount))
     .patch(asyncHandler(updateAccount))
     .delete(asyncHandler(deleteAccount));
 
 router.post(
     '/:username/books',
     runValidatorsAndHandleResult(addBookToTheListValidator),
-    authorizeAndSetRequestedUser(),
+    authorize(),
     asyncHandler(addBookToTheList)
 );
 
 router.get(
     '/:username/books/:bookId',
-    authorizeAndSetRequestedUser({ publicEndpoint: true }),
+    authorize({ publicEndpoint: true }),
     asyncHandler(getBookFromTheList)
 );
 
 router.patch(
     '/:username/books/:bookId',
     runValidatorsAndHandleResult(updateBookInTheListValidator),
-    authorizeAndSetRequestedUser(),
+    authorize(),
     asyncHandler(updateBookInTheList)
 );
 
 router.get(
     '/:username/books',
     runValidatorsAndHandleResult(getReadingListValidator),
-    authorizeAndSetRequestedUser({ publicEndpoint: true }),
+    authorize({ publicEndpoint: true }),
     asyncHandler(getReadingList)
 );
 

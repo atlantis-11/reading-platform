@@ -8,7 +8,6 @@ const Integer = {
 };
 
 const schema = new mongoose.Schema({
-    _id: false,
     entryType: {
         type: String,
         required: [true, 'Entry type is required'],
