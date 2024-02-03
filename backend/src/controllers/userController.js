@@ -69,6 +69,20 @@ async function getReadingList(req, res) {
     res.send(user.readingList);
 }
 
+async function getJournal(req, res) {
+    const user = await userService.getUser(req.params.username, ['readingList']);
+
+    const { bookId } = req.query;
+    if (bookId) {
+        userBookService.verifyBookInTheList(user, bookId);
+        const journal = userBookService.getBookJournal(user, bookId);
+        res.send(journal);
+    } else {
+        const journal = userBookService.getJournal(user);
+        res.send(journal);
+    }
+}
+
 module.exports = {
     getAccount,
     updateAccount,
@@ -76,5 +90,6 @@ module.exports = {
     addBookToTheList,
     getBookFromTheList,
     updateBookInTheList,
-    getReadingList
+    getReadingList,
+    getJournal
 };

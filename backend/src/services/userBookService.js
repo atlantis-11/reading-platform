@@ -90,6 +90,24 @@ function filterAndSortReadingList(user, { status, order, limit, skip, before, af
         .value();
 }
 
+function getBookJournal(user, bookId) {
+    const journal = user.readingList.find(e => e.book.toString() === bookId).journal.toObject();
+    journal.forEach(e => e.bookId = bookId);
+    return journal.reverse();
+}
+
+function getJournal(user) {
+    const readingList = user.readingList.toObject();
+        
+    readingList.forEach(rlEntry => {
+        rlEntry.journal.forEach(jEntry => {
+            jEntry.bookId = rlEntry.book;
+        });
+    });
+
+    return _.orderBy(_.flatMap(readingList, 'journal'), 'date', 'desc');
+}
+
 module.exports = {
     verifyBookNotInTheList,
     verifyBookInTheList,
@@ -100,5 +118,7 @@ module.exports = {
     filterAndSortReadingList,
     populateReadingList,
     populateBookInTheList,
-    depopulateReadingList
+    depopulateReadingList,
+    getBookJournal,
+    getJournal
 };

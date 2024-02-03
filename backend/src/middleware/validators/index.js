@@ -3,5 +3,6 @@ module.exports = {
     newBookValidator: require('./newBookValidator'),
     addBookToTheListValidator: require('./addBookToTheListValidator'),
     updateBookInTheListValidator: require('./updateBookInTheListValidator'),
-    getReadingListValidator: require('./getReadingListValidator')
+    getReadingListValidator: require('./getReadingListValidator'),
+    getJournalValidator: require('./getJournalValidator')
 };

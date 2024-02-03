@@ -6,7 +6,8 @@ const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHand
 const {
     addBookToTheListValidator,
     updateBookInTheListValidator,
-    getReadingListValidator
+    getReadingListValidator,
+    getJournalValidator
 } = require('../middleware/validators');
 const {
     getAccount,
@@ -15,7 +16,8 @@ const {
     addBookToTheList,
     getBookFromTheList,
     updateBookInTheList,
-    getReadingList
+    getReadingList,
+    getJournal
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -53,6 +55,13 @@ router.get(
     runValidatorsAndHandleResult(getReadingListValidator),
     authorize({ publicEndpoint: true }),
     asyncHandler(getReadingList)
+);
+
+router.get(
+    '/:username/journal',
+    runValidatorsAndHandleResult(getJournalValidator),
+    authorize({ publicEndpoint: true }),
+    asyncHandler(getJournal)
 );
 
 module.exports = router;
