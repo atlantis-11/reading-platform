@@ -27,6 +27,7 @@ async function updateAccount(user, data) {
 
 async function deleteAccount(user) {
     await user.deleteOne();
+    return getAccount(user);
 }
 
 module.exports = {

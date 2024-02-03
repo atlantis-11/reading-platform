@@ -3,14 +3,18 @@ const userBookService = require('../services/userBookService');
 const userService = require('../services/userService');
 const logger = require('../utils/logger');
 
+async function _getUserWithAccountProps(req) {
+    return await userService.getUser(req.params.username, accountService.accountProps);
+}
+
 async function getAccount(req, res) {
-    const user = await userService.getUser(req.params.username, accountService.accountProps);
+    const user = await _getUserWithAccountProps(req);
     const account = accountService.getAccount(user);
     res.send({ account });
 }
 
 async function updateAccount(req, res) {
-    const user = await userService.getUser(req.params.username, accountService.accountProps);
+    const user = await _getUserWithAccountProps(req);
     const account = await accountService.updateAccount(user, req.body);
 
     const message = 'Account updated successfully';
@@ -19,16 +23,20 @@ async function updateAccount(req, res) {
 }
 
 async function deleteAccount(req, res) {
-    const user = await userService.getUser(req.params.username, []);
-    await accountService.deleteAccount(user);
+    const user = await _getUserWithAccountProps(req);
+    const account = await accountService.deleteAccount(user);
 
     const message = 'Account deleted successfully';
     logger.info(message, { userId: user._id });
-    res.send({ message });
+    res.send({ message, account });
+}
+
+async function _getUserWithReadingList(req) {
+    return await userService.getUser(req.params.username, ['readingList']);
 }
 
 async function addBookToTheList(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
     const { bookId } = req.body;
 
     userBookService.verifyBookNotInTheList(user, bookId);
@@ -41,7 +49,7 @@ async function addBookToTheList(req, res) {
 }
 
 async function getBookFromTheList(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
     const { bookId } = req.params;
 
     userBookService.verifyBookInTheList(user, bookId);
@@ -49,7 +57,7 @@ async function getBookFromTheList(req, res) {
 }
 
 async function updateBookInTheList(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
     const { bookId } = req.params;
 
     userBookService.verifyBookInTheList(user, bookId);
@@ -61,7 +69,7 @@ async function updateBookInTheList(req, res) {
 }
 
 async function deleteBookFromTheList(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
     const { bookId } = req.params;
     
     userBookService.verifyBookInTheList(user, bookId);
@@ -73,7 +81,7 @@ async function deleteBookFromTheList(req, res) {
 }
 
 async function getReadingList(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
 
     user.readingList = userBookService.filterAndSortReadingList(user, req.query);
     await userBookService.populateReadingList(user);
@@ -82,7 +90,7 @@ async function getReadingList(req, res) {
 }
 
 async function getJournal(req, res) {
-    const user = await userService.getUser(req.params.username, ['readingList']);
+    const user = await _getUserWithReadingList(req);
 
     const { bookId } = req.query;
     if (bookId) {

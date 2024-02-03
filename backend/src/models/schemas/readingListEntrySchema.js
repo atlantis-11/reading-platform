@@ -15,7 +15,7 @@ const schema = new mongoose.Schema({
 
 function canChangeStatus(currentStatus, newStatus) {
     if (!currentStatus) {
-        return true;
+        return Object.values(BOOK_STATUSES).includes(newStatus);
     }
 
     const { TO_READ, READING, READ, DNF } = BOOK_STATUSES;
