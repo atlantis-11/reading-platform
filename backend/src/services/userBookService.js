@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const Book = require('../models/bookModel');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
-const { DuplicateResourceError, ValidationError } = require('../utils/customErrors');
+const { DuplicateResourceError, ValidationError, NotFoundError } = require('../utils/customErrors');
 
 function isBookInTheList(user, bookId) {
     return user.readingList.some(e => e.book.toString() === bookId);
@@ -15,13 +15,13 @@ function verifyBookNotInTheList(user, bookId) {
 
 function verifyBookInTheList(user, bookId) {
     if (!isBookInTheList(user, bookId)) {
-        throw new ValidationError('Book is not in the reading list');
+        throw new NotFoundError('Book is not in the reading list');
     }
 }
 
 async function verifyBookExists(bookId) {
     if (!await Book.exists({ _id: bookId })) {
-        throw new ValidationError('Book with given id does not exist');
+        throw new NotFoundError('Book with given id does not exist');
     }
 }
 
@@ -33,6 +33,11 @@ async function addBookToTheList(user, bookId) {
     } catch (error) {
         handleMongooseSaveErrors(error, 'Error adding book to the reading list');
     }
+}
+
+function getBookFromTheList(user, bookId) {
+    const readingListEntry = user.readingList.find(e => e.book.toString() === bookId);
+    return { status: readingListEntry.status, progress: readingListEntry.progress };
 }
 
 async function updateBookInTheList(user, bookId, data) {
@@ -90,6 +95,7 @@ module.exports = {
     verifyBookInTheList,
     verifyBookExists,
     addBookToTheList,
+    getBookFromTheList,
     updateBookInTheList,
     filterAndSortReadingList,
     populateReadingList,

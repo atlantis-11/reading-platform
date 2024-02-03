@@ -39,6 +39,14 @@ async function addBookToTheList(req, res) {
     res.send({ message });
 }
 
+async function getBookFromTheList(req, res) {
+    const user = req.requestedUser;
+    const { bookId } = req.params;
+
+    userBookService.verifyBookInTheList(user, bookId);
+    res.send(userBookService.getBookFromTheList(user, bookId));
+}
+
 async function updateBookInTheList(req, res) {
     const user = req.requestedUser;
     const { bookId } = req.params;
@@ -65,6 +73,7 @@ module.exports = {
     updateAccount,
     deleteAccount,
     addBookToTheList,
+    getBookFromTheList,
     updateBookInTheList,
     getReadingList
 };

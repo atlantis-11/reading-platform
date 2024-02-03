@@ -13,6 +13,7 @@ const {
     updateAccount,
     deleteAccount,
     addBookToTheList,
+    getBookFromTheList,
     updateBookInTheList,
     getReadingList
 } = require('../controllers/userController');
@@ -32,6 +33,12 @@ router.post(
     runValidatorsAndHandleResult(addBookToTheListValidator),
     authorizeAndSetRequestedUser(),
     asyncHandler(addBookToTheList)
+);
+
+router.get(
+    '/:username/books/:bookId',
+    authorizeAndSetRequestedUser({ publicEndpoint: true }),
+    asyncHandler(getBookFromTheList)
 );
 
 router.patch(
