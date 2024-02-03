@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 const { JOURNAL_ENTRY_TYPES } = require('../../config/constants');
 
+const Integer = {
+    type: Number,
+    get: v => Math.trunc(v),
+    set: v => Math.trunc(v)
+};
+
 const schema = new mongoose.Schema({
     _id: false,
     entryType: {
@@ -15,7 +21,11 @@ const schema = new mongoose.Schema({
         type: Date,
         required: [true, 'Date is required'],
         default: Date.now
-    }
+    },
+    totalPages: Integer,
+    pagesSinceLast: Integer,
+    totalPercents: Integer,
+    percentsSinceLast: Integer
 });
 
 module.exports = schema;

@@ -39,17 +39,16 @@ async function addBookToTheList(req, res) {
     res.send({ message });
 }
 
-async function updateBookStatus(req, res) {
+async function updateBookInTheList(req, res) {
     const user = req.requestedUser;
     const { bookId } = req.params;
-    const { status } = req.body;
 
     userBookService.verifyBookInTheList(user, bookId);
-    await userBookService.setBookStatus(user, bookId, status);
+    await userBookService.updateBookInTheList(user, bookId, req.body);
 
-    const message = 'Book\'s status updated successfully';
-    logger.info(message, { userId: user._id, bookId, status });
-    res.send({ message, bookId, status });
+    const message = 'Book in the reading list updated successfully';
+    logger.info(message, { userId: user._id, bookId });
+    res.send({ message, bookId });
 }
 
 async function getReadingList(req, res) {
@@ -66,6 +65,6 @@ module.exports = {
     updateAccount,
     deleteAccount,
     addBookToTheList,
-    updateBookStatus,
+    updateBookInTheList,
     getReadingList
 };

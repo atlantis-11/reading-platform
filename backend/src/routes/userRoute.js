@@ -5,7 +5,7 @@ const authorizeAndSetRequestedUser = require('../middleware/authorizeAndSetReque
 const runValidatorsAndHandleResult = require('../middleware/runValidatorsAndHandleResult');
 const {
     addBookToTheListValidator,
-    updateBookStatusValidator,
+    updateBookInTheListValidator,
     getReadingListValidator
 } = require('../middleware/validators');
 const {
@@ -13,7 +13,7 @@ const {
     updateAccount,
     deleteAccount,
     addBookToTheList,
-    updateBookStatus,
+    updateBookInTheList,
     getReadingList
 } = require('../controllers/userController');
 
@@ -36,9 +36,9 @@ router.post(
 
 router.patch(
     '/:username/books/:bookId',
-    runValidatorsAndHandleResult(updateBookStatusValidator),
+    runValidatorsAndHandleResult(updateBookInTheListValidator),
     authorizeAndSetRequestedUser(),
-    asyncHandler(updateBookStatus)
+    asyncHandler(updateBookInTheList)
 );
 
 router.get(

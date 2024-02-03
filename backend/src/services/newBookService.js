@@ -51,12 +51,14 @@ async function parseBookInfo(bookInfo) {
 
     const workInfo = await fetchFromOpenLibrary(bookInfo.works[0].key);
 
-    parsed.authors = await Promise.all(workInfo.authors.map(
-        async ({ author: { key } }) => {
-            const author = await fetchFromOpenLibrary(key);
-            return author.name;
-        }
-    ));
+    if (workInfo.authors) {
+        parsed.authors = await Promise.all(workInfo.authors.map(
+            async ({ author: { key } }) => {
+                const author = await fetchFromOpenLibrary(key);
+                return author.name;
+            }
+        ));
+    }
 
     if (typeof workInfo.description === 'string') {
         parsed.description = workInfo.description;

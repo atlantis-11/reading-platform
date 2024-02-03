@@ -35,15 +35,39 @@ async function addBookToTheList(user, bookId) {
     }
 }
 
-async function setBookStatus(user, bookId, status) {
-    const idx = user.readingList.findIndex(e => e.book.toString() === bookId);
-    user.readingList[idx].status = status;
+async function updateBookInTheList(user, bookId, data) {
+    const { status, progress } = data;
+
+    await populateBookInTheList(user, bookId);
+    
+    const readingListEntry = user.readingList.find(e => e.book._id.toString() === bookId);
+
+    if (status) {
+        readingListEntry.status = status;
+    } else if (progress) {
+        readingListEntry.progress = +progress;
+    }
+
+    depopulateReadingList(user);
 
     try {
         await user.save();
     } catch (error) {
-        handleMongooseSaveErrors(error, 'Error setting book\'s status');
+        handleMongooseSaveErrors(error, 'Error updating user\'s book');
     }
+}
+
+async function populateReadingList(user) {
+    await user.populate('readingList.book');
+}
+
+async function populateBookInTheList(user, bookId) {
+    const idx = user.readingList.findIndex(e => e.book.toString() === bookId);
+    await user.populate(`readingList.${idx}.book`);
+}
+
+function depopulateReadingList(user) {
+    user.depopulate('readingList.book');
 }
 
 function filterAndSortReadingList(user, { status, order, limit, skip, before, after } = {}) {
@@ -61,16 +85,14 @@ function filterAndSortReadingList(user, { status, order, limit, skip, before, af
         .value();
 }
 
-async function populateReadingList(user) {
-    await user.populate('readingList.book', '-__v');
-}
-
 module.exports = {
     verifyBookNotInTheList,
     verifyBookInTheList,
     verifyBookExists,
     addBookToTheList,
-    setBookStatus,
+    updateBookInTheList,
     filterAndSortReadingList,
-    populateReadingList
+    populateReadingList,
+    populateBookInTheList,
+    depopulateReadingList
 };

@@ -32,6 +32,17 @@ function canChangeStatus(currentStatus, newStatus) {
     return allowedStatuses.includes(newStatus);
 }
 
+const calculateProgress = (readingListEntry, newTotalPercents) => {
+    const percentsSinceLast = newTotalPercents - readingListEntry.progress;
+    const bookPages = readingListEntry.book.numberOfPages;
+    return {
+        totalPercents: newTotalPercents,
+        percentsSinceLast: percentsSinceLast,
+        totalPages: bookPages * newTotalPercents / 100,
+        pagesSinceLast: bookPages * percentsSinceLast / 100
+    };
+};
+
 schema.virtual('status')
     .get(function () {
         const journal = this.journal;
@@ -62,24 +73,64 @@ schema.virtual('status')
         const BS = BOOK_STATUSES;
         const ET = JOURNAL_ENTRY_TYPES;
 
-        const addEntry = (entryType) => {
+        const addStatusEntry = (entryType) => {
             this.journal.push({ entryType });
         };
 
         if (newStatus === BS.READING) {
-            addEntry(ET.STARTED);
+            addStatusEntry(ET.STARTED);
         } else if (newStatus === BS.READ) {
             if (currentStatus !== BS.READING) {
-                addEntry(ET.STARTED);
+                addStatusEntry(ET.STARTED);
             }
-            addEntry(ET.FINISHED);
+            this.journal.push({ entryType: ET.FINISHED, ...calculateProgress(this, 100) });
         } else if (newStatus === BS.DNF) {
             if (currentStatus !== BS.READING) {
-                addEntry(ET.STARTED);
+                addStatusEntry(ET.STARTED);
             }
-            addEntry(ET.DNF);
+            addStatusEntry(ET.DNF);
         } else if (newStatus === BS.TO_READ) {
-            addEntry(ET.TO_READ);
+            addStatusEntry(ET.TO_READ);
+        }
+    });
+
+schema.virtual('progress')
+    .get(function () {
+        if (this.status !== BOOK_STATUSES.READING) {
+            return undefined;
+        }
+
+        const journal = this.journal;
+        const lastJournalEntry = journal[journal.length - 1];
+
+        if (lastJournalEntry.entryType === JOURNAL_ENTRY_TYPES.STARTED) {
+            return 0;
+        } else {
+            return lastJournalEntry.totalPercents;
+        }
+    })
+    .set(function (newTotalPercents) {
+        if (this.status !== BOOK_STATUSES.READING) {
+            throw new ValidationError('This book\'s status is not reading');
+        }
+
+        const journal = this.journal;
+
+        if (newTotalPercents <= this.progress) {
+            throw new ValidationError('Progress cannot be set to lower value');
+        }
+
+        if (newTotalPercents > 100) {
+            newTotalPercents = 100;
+        }
+
+        if (newTotalPercents !== 100) {
+            journal.push({
+                entryType: JOURNAL_ENTRY_TYPES.PROGRESS,
+                ...calculateProgress(this, newTotalPercents)
+            });
+        } else {
+            this.status = BOOK_STATUSES.READ;
         }
     });
 
