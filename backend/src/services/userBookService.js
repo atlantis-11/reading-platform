@@ -62,6 +62,16 @@ async function updateBookInTheList(user, bookId, data) {
     }
 }
 
+async function deleteBookFromTheList(user, bookId) {
+    user.readingList.pull({ book: bookId });
+
+    try {
+        await user.save();
+    } catch (error) {
+        handleMongooseSaveErrors(error, 'Error deleting book from the reading list');
+    }
+}
+
 async function populateReadingList(user) {
     await user.populate('readingList.book');
 }
@@ -115,6 +125,7 @@ module.exports = {
     addBookToTheList,
     getBookFromTheList,
     updateBookInTheList,
+    deleteBookFromTheList,
     filterAndSortReadingList,
     populateReadingList,
     populateBookInTheList,

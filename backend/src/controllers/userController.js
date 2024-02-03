@@ -60,6 +60,18 @@ async function updateBookInTheList(req, res) {
     res.send({ message, bookId });
 }
 
+async function deleteBookFromTheList(req, res) {
+    const user = await userService.getUser(req.params.username, ['readingList']);
+    const { bookId } = req.params;
+    
+    userBookService.verifyBookInTheList(user, bookId);
+    await userBookService.deleteBookFromTheList(user, bookId);
+
+    const message = 'Book deleted from the reading list successfully';
+    logger.info(message, { userId: user._id, bookId });
+    res.send({ message, bookId });
+}
+
 async function getReadingList(req, res) {
     const user = await userService.getUser(req.params.username, ['readingList']);
 
@@ -90,6 +102,7 @@ module.exports = {
     addBookToTheList,
     getBookFromTheList,
     updateBookInTheList,
+    deleteBookFromTheList,
     getReadingList,
     getJournal
 };

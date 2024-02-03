@@ -16,6 +16,7 @@ const {
     addBookToTheList,
     getBookFromTheList,
     updateBookInTheList,
+    deleteBookFromTheList,
     getReadingList,
     getJournal
 } = require('../controllers/userController');
@@ -48,6 +49,12 @@ router.patch(
     runValidatorsAndHandleResult(updateBookInTheListValidator),
     authorize(),
     asyncHandler(updateBookInTheList)
+);
+
+router.delete(
+    '/:username/books/:bookId',
+    authorize(),
+    asyncHandler(deleteBookFromTheList)
 );
 
 router.get(
