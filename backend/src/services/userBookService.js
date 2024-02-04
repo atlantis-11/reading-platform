@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Book = require('../models/bookModel');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
+const { JOURNAL_ENTRY_TYPES } = require('../config/constants');
 const { DuplicateResourceError, ValidationError, NotFoundError } = require('../utils/customErrors');
 
 function isBookInTheList(user, bookId) {
@@ -37,7 +38,12 @@ async function addBookToTheList(user, bookId) {
 
 function getBookFromTheList(user, bookId) {
     const readingListEntry = user.readingList.find(e => e.book.toString() === bookId);
-    return { status: readingListEntry.status, progress: readingListEntry.progress };
+
+    return {
+        status: readingListEntry.status,
+        progress: readingListEntry.progress,
+        ...extractBookReadingHistory(readingListEntry.journal)
+    };
 }
 
 async function updateBookInTheList(user, bookId, data) {
@@ -131,7 +137,7 @@ function getJournalEntry(user, entryId) {
 
 async function deleteJournalEntry(user, entryId) {
     for (const rlEntry of user.readingList) {
-        const entryIdx = rlEntry.journal.findIndex(jEntry => jEntry._id.toString() === entryId)
+        const entryIdx = rlEntry.journal.findIndex(jEntry => jEntry._id.toString() === entryId);
 
         if (entryIdx !== -1) {
             if (entryIdx !== rlEntry.journal.length - 1) {
@@ -151,6 +157,25 @@ async function deleteJournalEntry(user, entryId) {
     }
     
     throw new NotFoundError('Journal entry not found');
+}
+
+function extractBookReadingHistory(entries) {
+    const readHistory = [];
+    const dnfHistory = [];
+
+    let startedEntry;
+
+    entries.forEach(entry => {
+        if (entry.entryType === JOURNAL_ENTRY_TYPES.STARTED) {
+            startedEntry = entry.date;
+        } else if (entry.entryType === JOURNAL_ENTRY_TYPES.FINISHED) {
+            readHistory.push({ started: startedEntry, finished: entry.date });
+        } else if (entry.entryType === JOURNAL_ENTRY_TYPES.DNF) {
+            dnfHistory.push({ started: startedEntry, dnf: entry.date });
+        }
+    });
+
+    return { readHistory, dnfHistory };
 }
 
 module.exports = {
