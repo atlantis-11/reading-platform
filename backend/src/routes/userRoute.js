@@ -7,7 +7,8 @@ const {
     addBookToTheListValidator,
     updateBookInTheListValidator,
     getReadingListValidator,
-    getJournalValidator
+    getJournalValidator,
+    updateJournalEntryValidator
 } = require('../middleware/validators');
 const {
     getAccount,
@@ -20,6 +21,7 @@ const {
     getReadingList,
     getJournal,
     getJournalEntry,
+    updateJournalEntry,
     deleteJournalEntry
 } = require('../controllers/userController');
 
@@ -77,6 +79,13 @@ router.get(
     '/:username/journal/:entryId',
     authorize({ publicEndpoint: true }),
     asyncHandler(getJournalEntry)
+);
+
+router.patch(
+    '/:username/journal/:entryId',
+    runValidatorsAndHandleResult(updateJournalEntryValidator),
+    authorize(),
+    asyncHandler(updateJournalEntry)
 );
 
 router.delete(

@@ -111,6 +111,17 @@ async function getJournalEntry(req, res) {
     res.send({ journalEntry });
 }
 
+async function updateJournalEntry(req, res) {
+    const user = await _getUserWithReadingList(req);
+    const { entryId } = req.params;
+
+    await userBookService.updateJournalEntry(user, entryId, req.body);
+    
+    const message = 'Journal entry updated successfully';
+    logger.info(message, { userId: user._id, entryId });
+    res.send({ message, entryId });
+}
+
 async function deleteJournalEntry(req, res) {
     const user = await _getUserWithReadingList(req);
     const { entryId } = req.params;
@@ -133,5 +144,6 @@ module.exports = {
     getReadingList,
     getJournal,
     getJournalEntry,
+    updateJournalEntry,
     deleteJournalEntry
 };

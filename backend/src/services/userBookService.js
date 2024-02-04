@@ -83,7 +83,7 @@ async function populateReadingList(user) {
 }
 
 async function populateBookInTheList(user, bookId) {
-    const idx = user.readingList.findIndex(e => e.book.toString() === bookId);
+    const idx = user.readingList.findIndex(e => e.book.toString() === bookId.toString());
     await user.populate(`readingList.${idx}.book`);
 }
 
@@ -135,20 +135,22 @@ function getJournalEntry(user, entryId) {
     throw new NotFoundError('Journal entry not found');
 }
 
-async function deleteJournalEntry(user, entryId) {
+async function performActionOnJournalEntry(user, entryId, actionType, action) {
     for (const rlEntry of user.readingList) {
-        const entryIdx = rlEntry.journal.findIndex(jEntry => jEntry._id.toString() === entryId);
+        const jEntryIdx = rlEntry.journal.findIndex(jEntry => jEntry._id.toString() === entryId);
 
-        if (entryIdx !== -1) {
-            if (entryIdx !== rlEntry.journal.length - 1) {
-                throw new ValidationError('Only the last journal entry for a book can be deleted');
+        if (jEntryIdx !== -1) {
+            if (jEntryIdx !== rlEntry.journal.length - 1) {
+                // update -> updated, delete -> deleted
+                throw new ValidationError(`Only the last journal entry for a book can be ${actionType}d`);
             } else {
-                rlEntry.journal.pull({ _id: rlEntry.journal[entryIdx]._id });
+                await action(rlEntry, jEntryIdx);
 
                 try {
                     await user.save();
                 } catch (error) {
-                    handleMongooseSaveErrors(error, 'Error deleting journal entry');
+                    // update -> updating, delete -> deleting
+                    handleMongooseSaveErrors(error, `Error ${actionType.slice(0, -1)}ing journal entry`);
                 }
 
                 return;
@@ -157,6 +159,38 @@ async function deleteJournalEntry(user, entryId) {
     }
     
     throw new NotFoundError('Journal entry not found');
+}
+
+async function updateJournalEntry(user, entryId, data) {
+    const { date } = data;
+
+    await performActionOnJournalEntry(user, entryId, 'update', async (rlEntry, jEntryIdx) => {
+        const journal = rlEntry.journal;
+
+        if (date) {
+            if (Date.now() < date) {
+                throw new ValidationError('Date cannot be in the future');
+            }
+
+            if (jEntryIdx === 0) {
+                journal[jEntryIdx].date = date;
+            } else {
+                if (journal[jEntryIdx - 1].date < date) {
+                    journal[jEntryIdx].date = date;
+                } else {
+                    throw new ValidationError('Date has to be later than the previous entry\'s');
+                }
+            }
+        }
+
+        // TODO: Updating other fields
+    });
+}
+
+async function deleteJournalEntry(user, entryId) {
+    await performActionOnJournalEntry(user, entryId, 'delete', async (rlEntry, jEntryIdx) => {
+        rlEntry.journal.pull({ _id: rlEntry.journal[jEntryIdx]._id });
+    });
 }
 
 function extractBookReadingHistory(entries) {
@@ -193,5 +227,6 @@ module.exports = {
     getBookJournal,
     getJournal,
     getJournalEntry,
+    updateJournalEntry,
     deleteJournalEntry
 };
