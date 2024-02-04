@@ -18,7 +18,9 @@ const {
     updateBookInTheList,
     deleteBookFromTheList,
     getReadingList,
-    getJournal
+    getJournal,
+    getJournalEntry,
+    deleteJournalEntry
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -69,6 +71,18 @@ router.get(
     runValidatorsAndHandleResult(getJournalValidator),
     authorize({ publicEndpoint: true }),
     asyncHandler(getJournal)
+);
+
+router.get(
+    '/:username/journal/:entryId',
+    authorize({ publicEndpoint: true }),
+    asyncHandler(getJournalEntry)
+);
+
+router.delete(
+    '/:username/journal/:entryId',
+    authorize(),
+    asyncHandler(deleteJournalEntry)
 );
 
 module.exports = router;

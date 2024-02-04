@@ -96,11 +96,30 @@ async function getJournal(req, res) {
     if (bookId) {
         userBookService.verifyBookInTheList(user, bookId);
         const journal = userBookService.getBookJournal(user, bookId);
-        res.send(journal);
+        res.send({ journal });
     } else {
         const journal = userBookService.getJournal(user);
-        res.send(journal);
+        res.send({ journal });
     }
+}
+
+async function getJournalEntry(req, res) {
+    const user = await _getUserWithReadingList(req);
+    const { entryId } = req.params;
+
+    const journalEntry = userBookService.getJournalEntry(user, entryId);
+    res.send({ journalEntry });
+}
+
+async function deleteJournalEntry(req, res) {
+    const user = await _getUserWithReadingList(req);
+    const { entryId } = req.params;
+
+    await userBookService.deleteJournalEntry(user, entryId);
+
+    const message = 'Journal entry deleted successfully';
+    logger.info(message, { userId: user._id, entryId });
+    res.send({ message, entryId });
 }
 
 module.exports = {
@@ -112,5 +131,7 @@ module.exports = {
     updateBookInTheList,
     deleteBookFromTheList,
     getReadingList,
-    getJournal
+    getJournal,
+    getJournalEntry,
+    deleteJournalEntry
 };

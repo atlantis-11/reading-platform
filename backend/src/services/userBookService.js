@@ -118,6 +118,41 @@ function getJournal(user) {
     return _.orderBy(_.flatMap(readingList, 'journal'), 'date', 'desc');
 }
 
+function getJournalEntry(user, entryId) {
+    for (const rlEntry of user.readingList.toObject()) {
+        const foundEntry = rlEntry.journal.find(jEntry => jEntry._id.toString() === entryId);
+        if (foundEntry) {
+            return { ...foundEntry, bookId: rlEntry.book };
+        }
+    }
+    
+    throw new NotFoundError('Journal entry not found');
+}
+
+async function deleteJournalEntry(user, entryId) {
+    for (const rlEntry of user.readingList) {
+        const entryIdx = rlEntry.journal.findIndex(jEntry => jEntry._id.toString() === entryId)
+
+        if (entryIdx !== -1) {
+            if (entryIdx !== rlEntry.journal.length - 1) {
+                throw new ValidationError('Only the last journal entry for a book can be deleted');
+            } else {
+                rlEntry.journal.pull({ _id: rlEntry.journal[entryIdx]._id });
+
+                try {
+                    await user.save();
+                } catch (error) {
+                    handleMongooseSaveErrors(error, 'Error deleting journal entry');
+                }
+
+                return;
+            }
+        }
+    }
+    
+    throw new NotFoundError('Journal entry not found');
+}
+
 module.exports = {
     verifyBookNotInTheList,
     verifyBookInTheList,
@@ -131,5 +166,7 @@ module.exports = {
     populateBookInTheList,
     depopulateReadingList,
     getBookJournal,
-    getJournal
+    getJournal,
+    getJournalEntry,
+    deleteJournalEntry
 };
