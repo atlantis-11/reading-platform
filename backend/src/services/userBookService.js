@@ -56,7 +56,7 @@ async function updateBookInTheList(user, bookId, data) {
     if (status) {
         readingListEntry.status = status;
     } else if (progress) {
-        readingListEntry.progress = +progress;
+        readingListEntry.progress = progress;
     }
 
     depopulateReadingList(user);

@@ -3,7 +3,7 @@ const { ValidationError } = require('../../utils/customErrors');
 
 module.exports = [
     body('status').optional().trim(),
-    body('progress').optional().isInt({ min: 1, max: 100 }).withMessage('Value has to be integer in range [1, 100]'),
+    body('progress').optional().isInt({ min: 1, max: 100 }).withMessage('Progress has to be integer in range [1, 100]').toInt(),
     (req, res, next) => {
         const fields = ['status', 'progress'];
         const providedCount = fields.reduce((count, field) => {
