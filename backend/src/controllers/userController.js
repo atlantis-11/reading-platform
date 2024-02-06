@@ -93,13 +93,13 @@ async function getReadingList(req, res) {
 async function getJournal(req, res) {
     const user = await _getUserWithReadingList(req);
 
-    const { bookId } = req.query;
+    const { bookId, before, after } = req.query;
     if (bookId) {
         userBookService.verifyBookInTheList(user, bookId);
         const journal = userJournalService.getBookJournal(user, bookId);
         res.send({ journal });
     } else {
-        const journal = userJournalService.getJournal(user);
+        const journal = userJournalService.getJournal(user, before, after);
         res.send({ journal });
     }
 }

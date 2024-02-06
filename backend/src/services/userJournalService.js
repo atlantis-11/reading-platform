@@ -8,16 +8,28 @@ function getBookJournal(user, bookId) {
     return journal.reverse();
 }
 
-function getJournal(user) {
+function getJournal(user, before, after) {
     const readingList = user.readingList.toObject();
-        
-    readingList.forEach(rlEntry => {
-        rlEntry.journal.forEach(jEntry => {
-            jEntry.bookId = rlEntry.book;
-        });
-    });
+    const globalJournal = [];
 
-    return _.orderBy(_.flatMap(readingList, 'journal'), 'date', 'desc');
+    for (const rlEntry of readingList) {
+        for (const jEntry of rlEntry.journal) {
+            if (after && jEntry.date < after) {
+                continue;
+            }
+
+            if (before && jEntry.date > before) {
+                break;
+            }
+
+            globalJournal.push({
+                bookId: rlEntry.book,
+                ...jEntry
+            });
+        }
+    }
+
+    return _.orderBy(globalJournal, 'date', 'desc');
 }
 
 function getJournalEntry(user, entryId) {
