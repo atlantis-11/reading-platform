@@ -8,7 +8,7 @@ function getBookJournal(user, bookId) {
     return journal.reverse();
 }
 
-function getJournal(user, before, after) {
+function getJournal(user, after, before) {
     const readingList = user.readingList.toObject();
     const globalJournal = [];
 

@@ -83,23 +83,22 @@ async function deleteBookFromTheList(req, res) {
 
 async function getReadingList(req, res) {
     const user = await _getUserWithReadingList(req);
+    const { status, after, before } = req.query;
 
-    user.readingList = userBookService.filterAndSortReadingList(user, req.query);
-    await userBookService.populateReadingList(user);
-
-    res.send(user.readingList);
+    const readingList = userBookService.filterAndSortReadingList(user, status, after, before);
+    res.send({ readingList });
 }
 
 async function getJournal(req, res) {
     const user = await _getUserWithReadingList(req);
 
-    const { bookId, before, after } = req.query;
+    const { bookId, after, before } = req.query;
     if (bookId) {
         userBookService.verifyBookInTheList(user, bookId);
         const journal = userJournalService.getBookJournal(user, bookId);
         res.send({ journal });
     } else {
-        const journal = userJournalService.getJournal(user, before, after);
+        const journal = userJournalService.getJournal(user, after, before);
         res.send({ journal });
     }
 }

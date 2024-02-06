@@ -1,7 +1,8 @@
 const _ = require('lodash');
 const Book = require('../models/bookModel');
 const handleMongooseSaveErrors = require('../utils/handleMongooseSaveErrors');
-const { JOURNAL_ENTRY_TYPES } = require('../config/constants');
+const userJournalService = require('../services/userJournalService');
+const { JOURNAL_ENTRY_TYPES, BOOK_STATUSES } = require('../config/constants');
 const { DuplicateResourceError, NotFoundError } = require('../utils/customErrors');
 
 function isBookInTheList(user, bookId) {
@@ -110,19 +111,24 @@ function depopulateReadingList(user) {
     user.depopulate('readingList.book');
 }
 
-function filterAndSortReadingList(user, { status, order, limit, skip, before, after } = {}) {
-    const start = skip ? +skip : 0;
-    const end = limit ? start + (+limit) : undefined;
+function filterAndSortReadingList(user, status, after, before) {
+    if (status === BOOK_STATUSES.TO_READ || status === BOOK_STATUSES.READING) {
+        return _(user.readingList)
+            .filter({ status })
+            .orderBy(e => e.journal[e.journal.length - 1].date, 'desc')
+            .map('book');
+    }
 
-    return _.chain(user.readingList)
-        .filter(e => {
-            return (!status || e.status === status)
-                && (!before || e.updatedAt < new Date(before))
-                && (!after || e.updatedAt > new Date(after));
-        })
-        .orderBy('updatedAt', order || 'desc')
-        .slice(start, end)
-        .value();
+    if (status === BOOK_STATUSES.READ || BOOK_STATUSES.DNF) {
+        const entryType = status === BOOK_STATUSES.READ ? JOURNAL_ENTRY_TYPES.FINISHED : JOURNAL_ENTRY_TYPES.DNF;
+        
+        const journal = userJournalService.getJournal(user, after, before);
+
+        return _(journal)
+            .filter({ entryType })
+            .orderBy('date', 'desc')
+            .map('bookId')
+    }
 }
 
 module.exports = {
