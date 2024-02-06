@@ -1,5 +1,6 @@
 const accountService = require('../services/accountService');
 const userBookService = require('../services/userBookService');
+const userJournalService = require('../services/userJournalService');
 const userService = require('../services/userService');
 const logger = require('../utils/logger');
 
@@ -95,10 +96,10 @@ async function getJournal(req, res) {
     const { bookId } = req.query;
     if (bookId) {
         userBookService.verifyBookInTheList(user, bookId);
-        const journal = userBookService.getBookJournal(user, bookId);
+        const journal = userJournalService.getBookJournal(user, bookId);
         res.send({ journal });
     } else {
-        const journal = userBookService.getJournal(user);
+        const journal = userJournalService.getJournal(user);
         res.send({ journal });
     }
 }
@@ -107,7 +108,7 @@ async function getJournalEntry(req, res) {
     const user = await _getUserWithReadingList(req);
     const { entryId } = req.params;
 
-    const journalEntry = userBookService.getJournalEntry(user, entryId);
+    const journalEntry = userJournalService.getJournalEntry(user, entryId);
     res.send({ journalEntry });
 }
 
@@ -115,7 +116,7 @@ async function updateJournalEntry(req, res) {
     const user = await _getUserWithReadingList(req);
     const { entryId } = req.params;
 
-    await userBookService.updateJournalEntry(user, entryId, req.body);
+    await userJournalService.updateJournalEntry(user, entryId, req.body);
     
     const message = 'Journal entry updated successfully';
     logger.info(message, { userId: user._id, entryId });
@@ -126,7 +127,7 @@ async function deleteJournalEntry(req, res) {
     const user = await _getUserWithReadingList(req);
     const { entryId } = req.params;
 
-    await userBookService.deleteJournalEntry(user, entryId);
+    await userJournalService.deleteJournalEntry(user, entryId);
 
     const message = 'Journal entry deleted successfully';
     logger.info(message, { userId: user._id, entryId });
